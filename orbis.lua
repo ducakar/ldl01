@@ -1,5 +1,3 @@
-require 'common'
-
 FIELDS = {
   {
     layers = { 1, 0 },
@@ -23,11 +21,11 @@ orbis = {
     2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
     2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
     2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-    2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-    2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-    2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-    2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-    2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+    2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 2, 2, 2, 2, 2,
+    2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2,
+    2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 2, 1, 2,
+    2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 2, 1, 2, 1, 2,
+    2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2,
     2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
   },
   objects = {}
@@ -42,58 +40,116 @@ function orbis:pos(field)
 end
 
 function orbis:pathStep(fields, path, depth, field)
-  print(depth, field, self.spaces[field], fields[field])
-
-  if depth > 2 or field < 1 or field > self.length or not self.spaces[field] then
-    return path
-  elseif fields[field] == 0 then
+  if fields[field] == 0 then
     return { field }
-  elseif not fields[field] or fields[field] > depth then
-    local minPath = nil
-
+  elseif fields[field] and fields[field] <= depth then
+    return path
+  else
     fields[field] = depth
 
-    minPath = self:pathStep(fields, minPath, depth + 1, field - 1)
-    minPath = self:pathStep(fields, minPath, depth + 1, field + 1)
-    minPath = self:pathStep(fields, minPath, depth + 1, field - self.width)
-    minPath = self:pathStep(fields, minPath, depth + 1, field + self.width)
-
-    if not minPath or (path and #path <= #minPath) then
+    if depth >= 20 then
       return path
     else
-      table.insert(minPath, field)
-      return minPath
+      local minPath    = nil
+      local fieldLeft  = field - 1
+      local fieldRight = field + 1
+      local fieldUp    = field - self.width
+      local fieldDown  = field + self.width
+
+      if fieldLeft < 1 or not self.spaces[fieldLeft] then
+        fieldLeft = nil
+      end
+      if self.length < fieldRight or not self.spaces[fieldRight] then
+        fieldRight = nil
+      end
+      if fieldUp < 1 or not self.spaces[fieldUp] then
+        fieldUp = nil
+      end
+      if self.length < fieldDown or not self.spaces[fieldDown] then
+        fieldDown = nil
+      end
+
+      if fieldLeft and fieldUp then
+        local fieldLeftUp = field - 1 - self.width
+
+        if fieldLeftUp >= 1 and self.spaces[fieldLeftUp] then
+          minPath = self:pathStep(fields, minPath, depth + 2, fieldLeftUp)
+        end
+      end
+
+      if fieldLeft and fieldDown then
+        local fieldLeftRight = field - 1 + self.width
+
+        if fieldLeftRight <= self.length and self.spaces[fieldLeftRight] then
+          minPath = self:pathStep(fields, minPath, depth + 2, fieldLeftRight)
+        end
+      end
+
+      if fieldRight and fieldUp then
+        local fieldRightUp = field + 1 - self.width
+
+        if fieldRightUp >= 1 and self.spaces[fieldRightUp] then
+          minPath = self:pathStep(fields, minPath, depth + 2, fieldRightUp)
+        end
+      end
+
+      if fieldRight and fieldDown then
+        local fieldRightDown = field + 1 + self.width
+
+        if fieldRightDown <= self.length and self.spaces[fieldRightDown] then
+          minPath = self:pathStep(fields, minPath, depth + 2, fieldRightDown)
+        end
+      end
+
+      if fieldLeft then
+        minPath = self:pathStep(fields, minPath, depth + 1, fieldLeft)
+      end
+      if fieldRight then
+        minPath = self:pathStep(fields, minPath, depth + 1, fieldRight)
+      end
+      if fieldUp then
+        minPath = self:pathStep(fields, minPath, depth + 1, fieldUp)
+      end
+      if fieldDown then
+        minPath = self:pathStep(fields, minPath, depth + 1, fieldDown)
+      end
+
+      if not minPath or (path and #path <= #minPath) then
+        return path
+      else
+        table.insert(minPath, field)
+        return minPath
+      end
     end
   end
 end
 
 function orbis:findPath(srcField, destField)
-  print('---', srcField, destField)
+  local t0 = os.clock()
   local fields = {}
-  fields[srcField] = 0
-  return self:pathStep(fields, nil, 1, destField)
+  fields[destField] = 0
+  local path = self:pathStep(fields, nil, 1, srcField)
+  print(os.clock() - t0)
+  return path
 end
 
-function orbis:draw(batch)
+function orbis:print()
+  local spaces = ''
+  local objects = ''
+
   for y = 1, self.height do
     for x = 1, self.width do
-      local field  = (y - 1) * self.width + x
-      local quads  = FIELDS[self.props[field]].quads
-      local object = self.objects[field - self.width]
-      local px, py = x * DIM, y * DIM
-
-      if quads[1] then
-        batch:add(quads[1], px, py, 0, 1, 1, 0, DIM)
-      end
-      if object then
-        local ox, oy = object:pos()
-        batch:add(atlas.robot[object.dir][1], ox * DIM, oy * DIM, 0, 1, 1, 0, DIM)
-      end
-      if quads[2] then
-        batch:add(quads[2], px, py, 0, 1, 1, 0, DIM)
-      end
+      spaces = spaces .. (self.spaces[(y - 1) * self.width + x] and '.' or 'x')
+      objects = objects .. (self.objects[(y - 1) * self.width + x] and 'o' or '.')
     end
+
+    spaces = spaces .. '\n'
+    objects = objects .. '\n'
   end
+
+  print(spaces)
+  print()
+  print(objects)
 end
 
 function orbis:update(dt)

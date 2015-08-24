@@ -1,5 +1,10 @@
 require 'orbis'
 
+DIM  = 16
+DIMY = 32
+
+local lg = love.graphics
+
 atlas = {}
 
 function atlas:init(imagePath)
@@ -10,16 +15,16 @@ function atlas:init(imagePath)
 
   self.robot = {
     {
-      lg.newQuad( 0, 0, 16, 32, imageWidth, imageHeight)
+      lg.newQuad(0 * DIM, 0, DIM, DIMY, imageWidth, imageHeight)
     },
     {
-      lg.newQuad(16, 0, 16, 32, imageWidth, imageHeight)
+      lg.newQuad(1 * DIM, 0, DIM, DIMY, imageWidth, imageHeight)
     },
     {
-      lg.newQuad(32, 0, 16, 32, imageWidth, imageHeight)
+      lg.newQuad(2 * DIM, 0, DIM, DIMY, imageWidth, imageHeight)
     },
     {
-      lg.newQuad(48, 0, 16, 32, imageWidth, imageHeight)
+      lg.newQuad(3 * DIM, 0, DIM, DIMY, imageWidth, imageHeight)
     }
   }
 
@@ -29,7 +34,7 @@ function atlas:init(imagePath)
     for i = 1, 2 do
       local value = field.layers[i]
       if value ~= 0 then
-        field.quads[i] = lg.newQuad(48 + i * 16, -32 + value * 32, 16, 32, imageWidth, imageHeight)
+        field.quads[i] = lg.newQuad(3 * DIM + i * DIM, -DIMY + value * DIMY, DIM, DIMY, imageWidth, imageHeight)
       end
     end
   end

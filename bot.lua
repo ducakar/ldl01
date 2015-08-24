@@ -2,8 +2,6 @@ require 'orbis'
 
 Bot = {
   field = nil,
-  x     = nil,
-  y     = nil,
   dir   = 1,
   space = false,
   speed = 4.0,
@@ -17,12 +15,11 @@ function Bot:new(o)
   return setmetatable(o, self)
 end
 
-function Bot:insert(x, y)
-  self.field = orbis:field(x, y)
-  self.x, self.y = x, y
+function Bot:insert(field)
+  self.field = field
 
-  orbis.spaces[self.field] = self.space
-  orbis.objects[self.field] = self
+  orbis.spaces[field] = self.space
+  orbis.objects[field] = self
 end
 
 function Bot:remove()
@@ -31,22 +28,24 @@ function Bot:remove()
 end
 
 function Bot:pos()
+  local srcX, srcY = orbis:pos(self.field)
+
   if not self.path then
-    return self.x, self.y
+    return srcX, srcY
   else
-    local x, y = orbis:pos(self.path[1])
-    return self.x + self.move * (x - self.x), self.y + self.move * (y - self.y)
+    local destX, destY = orbis:pos(self.path[#self.path])
+    return srcX + self.move * (destX - srcX), srcY + self.move * (destY - srcY)
   end
 end
 
 function Bot:destField()
-  return self.path and self.path[#self.path] or self.field
+  return self.path and self.path[1] or self.field
 end
 
 function Bot:setPathTo(destField)
   if self.path then
-    local srcField = self.path[1]
-    local oldDestField = self.path[#self.path]
+    local srcField = self.path[#self.path]
+    local oldDestField = self.path[1]
 
     orbis.spaces[oldDestField] = true
     orbis.spaces[self.field] = self.space -- Just in case if oldDestField == self.field
@@ -54,7 +53,7 @@ function Bot:setPathTo(destField)
     self.path = orbis:findPath(srcField, destField)
 
     if self.path then
-      table.insert(self.path, 1, srcField)
+      table.insert(self.path, srcField)
       orbis.spaces[destField] = self.space
     else
       self.path = { srcField }
@@ -72,7 +71,7 @@ end
 function Bot:update(dt)
   if self.path then
     if self.move == 0.0 then
-      local dField = self.path[1] - self.field
+      local dField = self.path[#self.path] - self.field
       self.dir = (dField == -1 and 4) or (dField == 1 and 3) or (dField < 0 and 1) or 2
     end
 
@@ -83,13 +82,12 @@ function Bot:update(dt)
       orbis.objects[self.field] = nil
 
       self.move = self.move - 1.0
-      self.field = self.path[1]
-      self.x, self.y = orbis:pos(self.field)
+      self.field = self.path[#self.path]
 
       orbis.spaces[self.field] = self.space
       orbis.objects[self.field] = self
 
-      table.remove(self.path, 1)
+      table.remove(self.path)
 
       if #self.path == 0 then
         self.move = 0.0
