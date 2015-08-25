@@ -8,7 +8,7 @@ local lg = love.graphics
 atlas = {}
 
 function atlas:init(imagePath)
-  self.image = lg.newImage(imagePath)
+  self.image = lg.newImage('gfx/atlas.png')
   self.image:setFilter('nearest', 'nearest')
 
   local imageWidth, imageHeight = self.image:getDimensions()

@@ -4,7 +4,7 @@ FIELDS = {
     space = true
   },
   {
-    layers = { 1, 1 },
+    layers = { 0, 1 },
     space = false
   }
 }
@@ -47,7 +47,7 @@ function orbis:pathStep(fields, path, depth, field)
   else
     fields[field] = depth
 
-    if depth >= 20 then
+    if depth >= 32 then
       return path
     else
       local minPath    = nil
@@ -125,43 +125,15 @@ function orbis:pathStep(fields, path, depth, field)
 end
 
 function orbis:findPath(srcField, destField)
-  local t0 = os.clock()
   local fields = {}
   fields[destField] = 0
-  local path = self:pathStep(fields, nil, 1, srcField)
-  print(os.clock() - t0)
-  return path
-end
-
-function orbis:print()
-  local spaces = ''
-  local objects = ''
-
-  for y = 1, self.height do
-    for x = 1, self.width do
-      spaces = spaces .. (self.spaces[(y - 1) * self.width + x] and '.' or 'x')
-      objects = objects .. (self.objects[(y - 1) * self.width + x] and 'o' or '.')
-    end
-
-    spaces = spaces .. '\n'
-    objects = objects .. '\n'
-  end
-
-  print(spaces)
-  print()
-  print(objects)
+  return self:pathStep(fields, nil, 1, srcField)
 end
 
 function orbis:update(dt)
-  for _, object in ipairs(self.objects) do
+  for _, object in pairs(orbis.objects) do
     if object.update then
       object:update(dt)
-    end
-  end
-
-  for _, bot in ipairs(self.bots) do
-    if bot.update then
-      bot:update(dt)
     end
   end
 end

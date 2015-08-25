@@ -3,15 +3,11 @@ require 'atlas'
 
 local lg = love.graphics
 
--- local WIDTH  = 640
--- local HEIGHT = 360
-local WIDTH  = 320
-local HEIGHT = 240
+local WIDTH  = 480
+local HEIGHT = 270
 
 local canvas = {}
-local actor = Bot:new({
-  speed = 4.0
-})
+local actor = Bot:new()
 
 function love.resize(windowWidth, windowHeight)
   local canvasRatio = WIDTH / HEIGHT
@@ -37,13 +33,13 @@ function love.load(table)
 
   love.resize(windowWidth, windowHeight)
   love.window.setMode(windowWidth, windowHeight, { resizable = true })
-  -- love.window.setFullscreen(true, 'desktop')
+  love.window.setFullscreen(true, 'desktop')
 
   canvas.handle = lg.newCanvas(WIDTH, HEIGHT)
   canvas.handle:setFilter('nearest', 'nearest')
 
   lg.setFont(lg.newFont('base/DroidSansMono.ttf', 12))
-  atlas:init('img/atlas.png')
+  atlas:init()
   batch = lg.newSpriteBatch(atlas.image)
 
   orbis:init()
@@ -54,10 +50,9 @@ function love.mousepressed(x, y, button)
   -- if button == 'r' then
     local localX, localY = (x - canvas.offsetX) / canvas.width * WIDTH, (y - canvas.offsetY) / canvas.height * HEIGHT
     local fieldX, fieldY = math.floor(localX / DIM), math.floor(localY / DIM)
-    local field = (fieldY - 1) * orbis.width + fieldX
 
-    if 1 <= field and field <= orbis.length then
-      actor:setPathTo(field)
+    if 1 <= fieldX and fieldX <= orbis.width and 1 <= fieldY and fieldY <= orbis.height then
+      actor:setPathTo((fieldY - 1) * orbis.width + fieldX)
     end
   -- end
 end
@@ -71,28 +66,44 @@ function love.keypressed(key)
 end
 
 function love.update(dt)
-  actor:update(dt)
+  orbis:update(dt)
 end
 
 function orbis:draw(batch)
-  for y = 1, self.height do
-    for x = 1, self.width do
-      local field  = (y - 1) * self.width + x
-      local quads  = FIELDS[self.props[field]].quads
-      local object = self.objects[field - self.width]
-      local px, py = x * DIM, y * DIM
+  local fieldBase = 0
 
-      if quads[1] then
-        batch:add(quads[1], px, py, 0, 1, 1, 0, DIM)
+  for y = 1, self.height + 1 do
+    for x = 1, self.width + 2 do
+      local field = fieldBase + x
+
+      if x <= self.width then
+        local floor = self.props[field]
+        if floor then
+          local quad = FIELDS[floor].quads[1]
+          if quad then
+            batch:add(quad, x * DIM, y * DIM, 0, 1, 1, 0, DIM)
+          end
+        end
       end
-      if object then
-        local ox, oy = object:pos()
-        batch:add(atlas.robot[object.dir][1], ox * DIM, oy * DIM, 0, 1, 1, 0, DIM)
+      if 1 < x and x <= self.width + 1 then
+        local object = self.objects[field - self.width - 1]
+        if object then
+          local ox, oy = object:pos()
+          batch:add(atlas.robot[object.dir][1], ox * DIM, oy * DIM, 0, 1, 1, 0, DIM)
+        end
       end
-      if quads[2] then
-        batch:add(quads[2], px, py, 0, 1, 1, 0, DIM)
+      if 2 < x then
+        local wall = self.props[field - self.width - 2]
+        if wall then
+          local quad = FIELDS[wall].quads[2]
+          if quad then
+            batch:add(quad, (x - 2) * DIM, (y - 1) * DIM, 0, 1, 1, 0, DIM)
+          end
+        end
       end
     end
+
+    fieldBase = fieldBase + self.width
   end
 end
 
