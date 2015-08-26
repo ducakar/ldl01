@@ -1,5 +1,6 @@
 function love.conf(t)
   t.identity = 'ldl01'
+  t.version = '0.9.2'
   t.console = false
 
   t.window.title = 'ldl01'

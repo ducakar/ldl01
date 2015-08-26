@@ -2,11 +2,12 @@ require 'orbis'
 
 Bot = {
   field = nil,
-  dir   = 1,
+  dir   = 0,
   space = false,
   speed = 4.0,
-  move  = 0.0,
-  path  = nil
+  anim  = 0.0,
+  path  = nil,
+  task  = nil
 }
 Bot.__index = Bot
 
@@ -34,7 +35,7 @@ function Bot:pos()
     return srcX, srcY
   else
     local destX, destY = orbis:pos(self.path[#self.path])
-    return srcX + self.move * (destX - srcX), srcY + self.move * (destY - srcY)
+    return srcX + self.anim * (destX - srcX), srcY + self.anim * (destY - srcY)
   end
 end
 
@@ -44,7 +45,15 @@ end
 
 function Bot:moveDir()
   local delta = self.path[#self.path] - self.field
-  return (delta == -1 and 3) or (delta == 1 and 4) or (delta < 0 and 2) or 1
+  return (delta == -1 and 2) or (delta == 1 and 3) or (delta < 0 and 1) or 0
+end
+
+function Bot:frame()
+  if self.path or not self.task then
+    return self.dir * 3 + ((self.anim < 0.167 and 1) or (self.anim < 0.500 and 2) or (self.anim < 0.833 and 3) or 1)
+  else
+    return (self.anim < 0.25 and 13) or (self.anim < 0.50 and 14) or (self.anim < 0.75 and 15) or 16
+  end
 end
 
 function Bot:setPathTo(destField)
@@ -74,22 +83,33 @@ function Bot:setPathTo(destField)
       if #self.path == 0 then
         self.path = nil
       else
-        orbis.spaces[destField] = self.space
         self.dir = self:moveDir()
+        self.anim = 0.0
+        self.task = nil
+
+        orbis.spaces[destField] = self.space
       end
     end
   end
 end
 
+function Bot:setTask(task)
+  if not self.path then
+    self.anim = 0.0
+    self.task = task
+  end
+  return self.task
+end
+
 function Bot:update(dt)
   if self.path then
-    self.move = self.move + self.speed * dt
+    self.anim = self.anim + self.speed * dt
 
-    if self.move > 1.0 then
+    if self.anim > 1.0 then
       orbis.spaces[self.field] = true
       orbis.objects[self.field] = nil
 
-      self.move = self.move - 1.0
+      self.anim = self.anim - 1.0
       self.field = self.path[#self.path]
 
       orbis.spaces[self.field] = self.space
@@ -97,13 +117,15 @@ function Bot:update(dt)
 
       table.remove(self.path)
 
-      if #self.path == 0 then
-        self.dir = 1
-        self.move = 0.0
-        self.path = nil
-      else
+      if #self.path ~= 0 then
         self.dir = self:moveDir()
+      else
+        self.dir = 0
+        self.path = nil
       end
     end
+  elseif self.task then
+    self.anim = self.anim + 2.0 * dt
+    self.anim = self.anim > 1.0 and self.anim - 1.0 or self.anim
   end
 end
