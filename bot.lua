@@ -64,7 +64,7 @@ function Bot:setPathTo(destField)
     orbis.spaces[oldDestField] = true
     orbis.spaces[self.field] = true
 
-    self.path = orbis:findPath(srcField, destField)
+    self.path = orbis:findPath(srcField, destField, self.dir)
 
     orbis.spaces[self.field] = self.space
 
@@ -75,7 +75,7 @@ function Bot:setPathTo(destField)
       orbis.spaces[srcField] = self.space
     end
   else
-    self.path = orbis:findPath(self.field, destField)
+    self.path = orbis:findPath(self.field, destField, self.dir)
 
     if self.path then
       table.remove(self.path)
@@ -95,7 +95,6 @@ end
 
 function Bot:setTask(task)
   if not self.path then
-    self.anim = 0.0
     self.task = task
   end
   return self.task
@@ -117,11 +116,11 @@ function Bot:update(dt)
 
       table.remove(self.path)
 
-      if #self.path ~= 0 then
-        self.dir = self:moveDir()
-      else
+      if #self.path == 0 then
         self.dir = 0
         self.path = nil
+      else
+        self.dir = self:moveDir()
       end
     end
   elseif self.task then

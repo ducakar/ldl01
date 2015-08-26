@@ -31,9 +31,9 @@ function atlas:init(imagePath)
     lg.newQuad(3 * DIM, 1 * DIMY, DIM, DIMY, imageWidth, imageHeight),
     lg.newQuad(3 * DIM, 2 * DIMY, DIM, DIMY, imageWidth, imageHeight),
     lg.newQuad(0 * DIM, 3 * DIMY, DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(0 * DIM, 4 * DIMY, DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(0 * DIM, 5 * DIMY, DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(0 * DIM, 6 * DIMY, DIM, DIMY, imageWidth, imageHeight)
+    lg.newQuad(1 * DIM, 3 * DIMY, DIM, DIMY, imageWidth, imageHeight),
+    lg.newQuad(2 * DIM, 3 * DIMY, DIM, DIMY, imageWidth, imageHeight),
+    lg.newQuad(3 * DIM, 3 * DIMY, DIM, DIMY, imageWidth, imageHeight)
   }
 
   for _, field in ipairs(FIELDS) do
