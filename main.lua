@@ -10,6 +10,26 @@ HEIGHT = 225
 
 local canvas = {}
 
+function love.keypressed(key)
+  if key == 'f11' then
+    love.window.setFullscreen(not love.window.getFullscreen(), 'desktop')
+  elseif key == 'escape' then
+    love.event.quit()
+  else
+    game.keyPressed(key)
+  end
+end
+
+function love.mousepressed(x, y, button)
+  local localX, localY = (x - canvas.offsetX) / canvas.width * WIDTH, (y - canvas.offsetY) / canvas.height * HEIGHT
+  game.mousePressed(localX, localY, button)
+end
+
+function love.mousemoved(x, y)
+  local localX, localY = (x - canvas.offsetX) / canvas.width * WIDTH, (y - canvas.offsetY) / canvas.height * HEIGHT
+  game.mouseMoved(localX, localY)
+end
+
 function love.resize(windowWidth, windowHeight)
   local canvasRatio = WIDTH / HEIGHT
   local windowRatio = windowWidth / windowHeight
@@ -36,45 +56,29 @@ function love.load(table)
   love.window.setMode(windowWidth, windowHeight, { resizable = true })
   love.window.setFullscreen(true, 'desktop')
 
-  canvas.handle = lg.newCanvas(WIDTH, HEIGHT)
-  canvas.handle:setFilter('nearest', 'nearest')
+  lg.setDefaultFilter('nearest', 'nearest')
 
-  atlas:init()
+  canvas.handle = lg.newCanvas(WIDTH, HEIGHT)
+
+  atlas.init(batch)
   batch = lg.newSpriteBatch(atlas.image)
 
-  ui:init()
-  game:init()
-end
-
-function love.keypressed(key)
-  if key == 'f11' then
-    love.window.setFullscreen(not love.window.getFullscreen(), 'desktop')
-  elseif key == 'escape' then
-    love.event.quit()
-  else
-    game:keyPressed(key)
-  end
-end
-
-function love.mousepressed(x, y, button)
-  local localX, localY = (x - canvas.offsetX) / canvas.width * WIDTH, (y - canvas.offsetY) / canvas.height * HEIGHT
-  game:mousePressed(localX, localY, button)
-end
-
-function love.update(dt)
-  game:update(dt)
-  ui:update(dt)
+  game.init()
 end
 
 function love.draw()
-  game:draw(batch)
+  game.draw(batch)
 
   lg.setCanvas(canvas.handle)
   lg.clear()
   lg.draw(batch)
-  ui:draw()
+  ui.draw()
   lg.setCanvas()
   lg.draw(canvas.handle, canvas.offsetX, canvas.offsetY, 0, canvas.scale, canvas.scale)
 
   batch:clear()
+end
+
+function love.update(dt)
+  game.update(dt)
 end

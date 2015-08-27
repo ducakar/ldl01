@@ -1,52 +1,18 @@
-FIELDS = {
-  {
-    layers = { 1, 0 },
-    space = true
-  },
-  {
-    layers = { 0, 1 },
-    space = false
-  }
-}
-
-PROPS = {
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 2, 2, 2, 2, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 2, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 2, 1, 2, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
-}
+local pathFields = {}
 
 orbis = {
   width   = 16,
   height  = 12,
   length  = 16 * 12,
-  spaces  = {},
-  props   = {},
-  devices = {},
+  tiles   = {},
   objects = {},
+  spaces  = {},
+  devices = {},
   time    = 0,
   day     = 1,
 }
 
-local pathFields = {}
-
-function orbis:field(x, y)
-  return (y - 1) * self.width + x
-end
-
-function orbis:pos(field)
-  return math.fmod(field - 1, self.width) + 1, math.floor((field - 1) / self.width + 1.0)
-end
-
-function orbis:pathStep(path, depth, field)
+local function pathStep(path, depth, field)
   if pathFields[field] == 0 then
     return { field }
   elseif not pathFields[field] or pathFields[field] <= depth then
@@ -58,22 +24,22 @@ function orbis:pathStep(path, depth, field)
       return path
     else
       local minPath    = nil
-      local fieldUp    = field - self.width
-      local fieldDown  = field + self.width
+      local fieldUp    = field - orbis.width
+      local fieldDown  = field + orbis.width
       local fieldLeft  = field - 1
       local fieldRight = field + 1
 
-      if 1 <= fieldUp and self.spaces[fieldUp] then
-        minPath = self:pathStep(minPath, depth + 1, fieldUp)
+      if 1 <= fieldUp and orbis.spaces[fieldUp] then
+        minPath = pathStep(minPath, depth + 1, fieldUp)
       end
-      if fieldDown <= self.length and self.spaces[fieldDown] then
-        minPath = self:pathStep(minPath, depth + 1, fieldDown)
+      if fieldDown <= orbis.length and orbis.spaces[fieldDown] then
+        minPath = pathStep(minPath, depth + 1, fieldDown)
       end
-      if 1 <= fieldLeft and self.spaces[fieldLeft] then
-        minPath = self:pathStep(minPath, depth + 1, fieldLeft)
+      if 1 <= fieldLeft and orbis.spaces[fieldLeft] then
+        minPath = pathStep(minPath, depth + 1, fieldLeft)
       end
-      if fieldRight <= self.length and self.spaces[fieldRight] then
-        minPath = self:pathStep(minPath, depth + 1, fieldRight)
+      if fieldRight <= orbis.length and orbis.spaces[fieldRight] then
+        minPath = pathStep(minPath, depth + 1, fieldRight)
       end
 
       if not minPath or (path and #path <= #minPath + 1) then
@@ -86,21 +52,49 @@ function orbis:pathStep(path, depth, field)
   end
 end
 
-function orbis:findPath(srcField, destField, dir)
-  for i = 1, self.length do
-    pathFields[i] = 1024
-  end
-  pathFields[destField] = 0
-
-  return self:pathStep(nil, 1, srcField, dir)
+function orbis.field(x, y)
+  return (y - 1) * orbis.width + x
 end
 
-function orbis:update(dt)
-  self.time = self.time + dt * 1
+function orbis.pos(field)
+  return math.fmod(field - 1, orbis.width) + 1, math.floor((field - 1) / orbis.width + 1.0)
+end
 
-  if self.time > 86400 then
-    self.time = self.time - 86400
-    self.day = self.day + 1
+function orbis.findPath(srcField, destField)
+  if srcField == destField then
+    return nil
+  else
+    for i = 1, orbis.length do
+      pathFields[i] = 1024
+    end
+    pathFields[destField] = 0
+
+    return pathStep(nil, 1, srcField)
+  end
+end
+
+function orbis.setTiles(tiles, tileTypes)
+  if tiles then
+    assert(#tiles == orbis.length)
+
+    for i = 1, orbis.length do
+      orbis.tiles[i] = tiles[i]
+      orbis.spaces[i] = tileTypes[tiles[i]].space
+    end
+  else
+    for i = 1, orbis.length do
+      orbis.tiles[i] = 0
+      orbis.spaces[i] = true
+    end
+  end
+end
+
+function orbis.update(dt)
+  orbis.time = orbis.time + dt * 1
+
+  if orbis.time > 86400 then
+    orbis.time = orbis.time - 86400
+    orbis.day = orbis.day + 1
   end
 
   for _, object in pairs(orbis.objects) do
@@ -110,10 +104,6 @@ function orbis:update(dt)
   end
 end
 
-function orbis:init()
-  self.props = PROPS
-
-  for i = 1, self.length do
-    self.spaces[i] = FIELDS[self.props[i]].space
-  end
+function orbis.init()
+  orbis.setTiles()
 end

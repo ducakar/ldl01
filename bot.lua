@@ -1,51 +1,38 @@
 require 'orbis'
 
 Bot = {
-  field = nil,
+  field = 0,
   dir   = 0,
-  space = false,
   speed = 4.0,
-  anim  = 0.0,
   path  = nil,
-  task  = nil
+  task  = false,
+  anim  = 0.0
 }
 Bot.__index = Bot
+
+local function moveDir(bot)
+  local delta = bot.path[#bot.path] - bot.field
+  return (delta == -1 and 2) or (delta == 1 and 3) or (delta < 0 and 1) or 0
+end
 
 function Bot:new(o)
   o = o or {}
   return setmetatable(o, self)
 end
 
-function Bot:insert(field)
-  self.field = field
-
-  orbis.spaces[field] = self.space
-  orbis.objects[field] = self
-end
-
-function Bot:remove()
-  orbis.spaces[self.field] = true
-  orbis.objects[self.field] = nil
-end
-
 function Bot:pos()
-  local srcX, srcY = orbis:pos(self.field)
+  local srcX, srcY = orbis.pos(self.field)
 
   if not self.path then
     return srcX, srcY
   else
-    local destX, destY = orbis:pos(self.path[#self.path])
+    local destX, destY = orbis.pos(self.path[#self.path])
     return srcX + self.anim * (destX - srcX), srcY + self.anim * (destY - srcY)
   end
 end
 
 function Bot:destField()
   return self.path and self.path[1] or self.field
-end
-
-function Bot:moveDir()
-  local delta = self.path[#self.path] - self.field
-  return (delta == -1 and 2) or (delta == 1 and 3) or (delta < 0 and 1) or 0
 end
 
 function Bot:frame()
@@ -62,42 +49,43 @@ function Bot:setPathTo(destField)
     local oldDestField = self.path[1]
 
     orbis.spaces[oldDestField] = true
-    orbis.spaces[self.field] = true
 
-    self.path = orbis:findPath(srcField, destField, self.dir)
-
-    orbis.spaces[self.field] = self.space
+    self.path = orbis.findPath(srcField, destField)
 
     if self.path then
-      orbis.spaces[destField] = self.space
+      orbis.spaces[destField] = false
     else
       self.path = { srcField }
-      orbis.spaces[srcField] = self.space
+      orbis.spaces[srcField] = false
     end
   else
-    self.path = orbis:findPath(self.field, destField, self.dir)
+    self.path = orbis.findPath(self.field, destField)
 
     if self.path then
       table.remove(self.path)
 
-      if #self.path == 0 then
-        self.path = nil
-      else
-        self.dir = self:moveDir()
-        self.anim = 0.0
-        self.task = nil
+      self.dir = moveDir(self)
+      self.task = false
+      self.anim = 0.0
 
-        orbis.spaces[destField] = self.space
-      end
+      orbis.spaces[self.field] = true
+      orbis.spaces[destField] = false
     end
   end
 end
 
-function Bot:setTask(task)
-  if not self.path then
-    self.task = task
-  end
-  return self.task
+function Bot:place(field)
+  self.field = field
+
+  orbis.objects[field] = self
+  orbis.spaces[field] = false
+end
+
+function Bot:remove()
+  orbis.objects[self.field] = nil
+  orbis.spaces[self.field] = true
+
+  self.field = 0
 end
 
 function Bot:update(dt)
@@ -105,26 +93,28 @@ function Bot:update(dt)
     self.anim = self.anim + self.speed * dt
 
     if self.anim > 1.0 then
-      orbis.spaces[self.field] = true
       orbis.objects[self.field] = nil
 
-      self.anim = self.anim - 1.0
       self.field = self.path[#self.path]
-
-      orbis.spaces[self.field] = self.space
-      orbis.objects[self.field] = self
-
+      self.anim = self.anim - 1.0
       table.remove(self.path)
+
+      orbis.objects[self.field] = self
 
       if #self.path == 0 then
         self.dir = 0
+        self.anim = 0.0
         self.path = nil
       else
-        self.dir = self:moveDir()
+        self.dir = moveDir(self)
       end
     end
-  elseif self.task then
+  elseif orbis.devices[self.field] then
+    self.task = true
     self.anim = self.anim + 2.0 * dt
     self.anim = self.anim > 1.0 and self.anim - 1.0 or self.anim
+  else
+    self.task = false
+    self.anim = 0.0
   end
 end

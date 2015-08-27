@@ -1,28 +1,49 @@
 require 'orbis'
 require 'bot'
+require 'device'
 require 'ui'
 require 'atlas'
+
+local TILES = {
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 2, 2, 2, 2, 2,
+  2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2,
+  2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 2, 1, 2,
+  2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 2, 1, 2, 1, 2,
+  2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2,
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+}
+
+FIELDS = {
+  {
+    layers = { 1, 0 },
+    space = true
+  },
+  {
+    layers = { 0, 1 },
+    space = false
+  }
+}
 
 game = {
   timeWarp = 1.0
 }
 
 actor = Bot:new {}
+server = Device:new {}
 
-function game:keyPressed(key)
-  if key == ' ' then
-    if ui:active() then
-      ui:show(nil)
-    else
-      actor:setTask(true)
-    end
-  elseif key == 'd' then
-    ui:show('drek')
-  end
+function game.keyPressed(key)
+  ui.keyPressed(key)
 end
 
-function game:mousePressed(x, y, button)
-  if ui:active() then
+function game.mousePressed(x, y, button)
+  if ui.active() then
+    ui.mousePressed(x, y, button)
   else
     local fieldX, fieldY = math.floor(x / DIM), math.floor(y / DIM)
 
@@ -32,7 +53,13 @@ function game:mousePressed(x, y, button)
   end
 end
 
-function game:draw(batch)
+function game.mouseMoved(x, y)
+  if ui.active() then
+    ui.mouseMoved(x, y)
+  end
+end
+
+function game.draw(batch)
   local fieldBase = 0
 
   for y = 1, orbis.height + 1 do
@@ -40,12 +67,15 @@ function game:draw(batch)
       local field = fieldBase + x
 
       if x <= orbis.width then
-        local floor = orbis.props[field]
+        local floor = orbis.tiles[field]
         if floor then
           local quad = FIELDS[floor].quads[1]
           if quad then
             batch:add(quad, x * DIM, y * DIM, 0, 1, 1, 0, DIM)
           end
+        end
+        if not orbis.spaces[field] then
+          batch:add(atlas.cross, x * DIM, y * DIM, 0, 1, 1, 0, DIM)
         end
       end
       if x <= orbis.width then
@@ -56,7 +86,7 @@ function game:draw(batch)
         end
       end
       if 1 < x then
-        local wall = orbis.props[field - orbis.width - 1]
+        local wall = orbis.tiles[field - orbis.width - 1]
         if wall then
           local quad = FIELDS[wall].quads[2]
           if quad then
@@ -70,22 +100,25 @@ function game:draw(batch)
   end
 end
 
-function game:update(dt)
-  orbis:update(dt)
+function game.update(dt)
+  if not ui.active() then
+    orbis.update(dt)
+  end
+
+  if server.field ~= 0 and orbis.time > 10 then
+    server:remove()
+  end
 end
 
-function game:init()
-  orbis:init()
+function game.init()
+  ui.init()
 
-  actor:insert(orbis:field(5, 5))
+  orbis.init()
+  orbis.setTiles(TILES, FIELDS)
+  actor:place(orbis.field(5, 5))
+  server:place(orbis.field(3, 8))
 
-  ui:show([[
+  ui.show([[
   AVA: Hello, are you alive?
-  Kakanahishi
-  Radamayoto
-  Makito Narami
-  Samayama
-  Matako Koyama
-  Ritomasashito
   ]])
 end

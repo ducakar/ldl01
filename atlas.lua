@@ -1,23 +1,18 @@
 require 'orbis'
 
+local lg = love.graphics
+
 DIM = 16
 
 atlas = {}
 
 local DIMY  = 32
-local ASCII = [[ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~]]
 
-local lg = love.graphics
+function atlas.init(imagePath)
+  atlas.image = lg.newImage('gfx/atlas.png')
+  local imageWidth, imageHeight = atlas.image:getDimensions()
 
-function atlas:init(imagePath)
-  lg.setFont(lg.newImageFont('base/font.png', ASCII))
-
-  self.image = lg.newImage('gfx/atlas.png')
-  self.image:setFilter('nearest', 'nearest')
-
-  local imageWidth, imageHeight = self.image:getDimensions()
-
-  self.robot = {
+  atlas.robot = {
     lg.newQuad(0 * DIM, 0 * DIMY, DIM, DIMY, imageWidth, imageHeight),
     lg.newQuad(0 * DIM, 1 * DIMY, DIM, DIMY, imageWidth, imageHeight),
     lg.newQuad(0 * DIM, 2 * DIMY, DIM, DIMY, imageWidth, imageHeight),
@@ -46,4 +41,6 @@ function atlas:init(imagePath)
       end
     end
   end
+
+  atlas.cross = lg.newQuad(7 * DIM, 0, DIM, DIMY, imageWidth, imageHeight)
 end
