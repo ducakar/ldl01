@@ -93,3 +93,6 @@ function Device:remove()
 
   self.field = 0
 end
+
+function Device:draw(batch)
+end

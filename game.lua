@@ -5,23 +5,38 @@ require 'ui'
 require 'atlas'
 
 local TILES = {
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 2, 2, 1, 2, 2, 2, 2, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 1, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 2, 1, 2, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 2, 2, 1, 2, 1, 2,
-  2, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 2, 1, 2,
-  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
+  2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
+  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 4, 3, 4, 3, 4, 4, 3, 3, 3, 3, 3, 3, 3, 3, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 4, 3, 4, 3, 4, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 4, 3, 4, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 4, 3, 4, 3, 3, 4, 4, 4, 3, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 4, 3, 4, 3, 3, 3, 4, 3, 3, 4, 3, 3, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 4, 3, 4, 4, 3, 3, 4, 3, 3, 4, 3, 4, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 4, 3, 3, 3, 3, 3, 4, 3, 4, 4, 3, 4, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 4, 3, 3, 3, 3, 3, 4, 3, 3, 3, 3, 4, 3, 4, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2,
+  2, 1, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2
 }
+
+local timeWarp = 1.0
+local actor
+local server
 
 FIELDS = {
   {
     layers = { 1, 0 },
+    space = true
+  },
+  {
+    layers = { 1, 0 },
+    space = false
+  },
+  {
+    layers = { 2, 0 },
     space = true
   },
   {
@@ -30,22 +45,21 @@ FIELDS = {
   }
 }
 
-game = {
-  timeWarp = 1.0
-}
-
-actor = Bot:new {}
-server = Device:new {}
+game = {}
 
 function game.keyPressed(key)
   ui.keyPressed(key)
+
+  if key == 'd' then
+    ui.show('AVA> Are you alive?\n\nAVA> What da fuck?', { 'Yes', 'No' })
+  end
 end
 
 function game.mousePressed(x, y, button)
   if ui.active() then
     ui.mousePressed(x, y, button)
   else
-    local fieldX, fieldY = math.floor(x / DIM), math.floor(y / DIM)
+    local fieldX, fieldY = math.floor(x / DIM) + 1, math.floor(y / DIM) + 1
 
     if 1 <= fieldX and fieldX <= orbis.width and 1 <= fieldY and fieldY <= orbis.height then
       actor:setPathTo((fieldY - 1) * orbis.width + fieldX)
@@ -71,18 +85,14 @@ function game.draw(batch)
         if floor then
           local quad = FIELDS[floor].quads[1]
           if quad then
-            batch:add(quad, x * DIM, y * DIM, 0, 1, 1, 0, DIM)
+            batch:add(quad, (x - 1) * DIM, (y - 1) * DIM)
           end
-        end
-        if not orbis.spaces[field] then
-          batch:add(atlas.cross, x * DIM, y * DIM, 0, 1, 1, 0, DIM)
         end
       end
       if x <= orbis.width then
         local object = orbis.objects[field - orbis.width]
         if object then
-          local ox, oy = object:pos()
-          batch:add(atlas.robot[object:frame()], ox * DIM, oy * DIM, 0, 1, 1, 0, DIM)
+          object:draw(batch)
         end
       end
       if 1 < x then
@@ -90,7 +100,7 @@ function game.draw(batch)
         if wall then
           local quad = FIELDS[wall].quads[2]
           if quad then
-            batch:add(quad, (x - 1) * DIM, (y - 1) * DIM, 0, 1, 1, 0, DIM)
+            batch:add(quad, (x - 2) * DIM, (y - 2) * DIM, 0, 1, 1, 0, DIM)
           end
         end
       end
@@ -102,23 +112,23 @@ end
 
 function game.update(dt)
   if not ui.active() then
-    orbis.update(dt)
+    orbis.update(dt, timeWarp)
   end
 
-  if server.field ~= 0 and orbis.time > 10 then
-    server:remove()
-  end
+  ui.update(dt)
 end
 
 function game.init()
   ui.init()
 
+  Bot:init()
+
   orbis.init()
   orbis.setTiles(TILES, FIELDS)
-  actor:place(orbis.field(5, 5))
-  server:place(orbis.field(3, 8))
 
-  ui.show([[
-  AVA: Hello, are you alive?
-  ]])
+  actor = Bot:new()
+  -- server = Device:new()
+
+  actor:place(orbis.field(4, 4))
+  -- server:place(orbis.field(13, 6))
 end

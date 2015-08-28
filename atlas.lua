@@ -1,6 +1,5 @@
-require 'orbis'
-
 local lg = love.graphics
+local ls = love.sound
 
 DIM = 16
 
@@ -34,13 +33,15 @@ function atlas.init(imagePath)
   for _, field in ipairs(FIELDS) do
     field.quads = {}
 
-    for i = 1, 2 do
-      local value = field.layers[i]
-      if value ~= 0 then
-        field.quads[i] = lg.newQuad(3 * DIM + i * DIM, -DIMY + value * DIMY, DIM, DIMY, imageWidth, imageHeight)
-      end
+    if field.layers[1] ~= 0 then
+      field.quads[1] = lg.newQuad(4 * DIM, -DIM + field.layers[1] * DIM, DIM, DIM, imageWidth, imageHeight)
+    end
+    if field.layers[2] ~= 0 then
+      field.quads[2] = lg.newQuad(5 * DIM, -DIMY + field.layers[2] * DIMY, DIM, DIMY, imageWidth, imageHeight)
     end
   end
 
   atlas.cross = lg.newQuad(7 * DIM, 0, DIM, DIMY, imageWidth, imageHeight)
+
+  atlas.step = ls.newSoundData('sfx/footstep1.wav')
 end

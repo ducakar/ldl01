@@ -3,10 +3,8 @@ require 'game'
 
 local lg = love.graphics
 
--- local WIDTH  = 480
--- local HEIGHT = 270
-WIDTH = 400
-HEIGHT = 225
+WIDTH  = 400
+HEIGHT = 240
 
 local canvas = {}
 

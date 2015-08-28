@@ -1,4 +1,5 @@
 require 'orbis'
+require 'atlas'
 
 Bot = {
   field = 0,
@@ -6,13 +7,21 @@ Bot = {
   speed = 4.0,
   path  = nil,
   task  = false,
-  anim  = 0.0
+  anim  = 0.0,
+  fx    = {}
 }
 Bot.__index = Bot
 
 local function moveDir(bot)
   local delta = bot.path[#bot.path] - bot.field
-  return (delta == -1 and 2) or (delta == 1 and 3) or (delta < 0 and 1) or 0
+  return (delta == -1 and 3) or (delta == 1 and 2) or (delta < 0 and 1) or 0
+end
+
+function Bot:init()
+  self.fx = {
+    step   = love.audio.newSource(atlas.step),
+    frames = atlas.robot
+  }
 end
 
 function Bot:new(o)
@@ -28,18 +37,6 @@ function Bot:pos()
   else
     local destX, destY = orbis.pos(self.path[#self.path])
     return srcX + self.anim * (destX - srcX), srcY + self.anim * (destY - srcY)
-  end
-end
-
-function Bot:destField()
-  return self.path and self.path[1] or self.field
-end
-
-function Bot:frame()
-  if self.path or not self.task then
-    return self.dir * 3 + ((self.anim < 0.167 and 1) or (self.anim < 0.500 and 2) or (self.anim < 0.833 and 3) or 1)
-  else
-    return (self.anim < 0.25 and 13) or (self.anim < 0.50 and 14) or (self.anim < 0.75 and 15) or 16
   end
 end
 
@@ -75,6 +72,8 @@ function Bot:setPathTo(destField)
 end
 
 function Bot:place(field)
+  assert(orbis.spaces[field])
+
   self.field = field
 
   orbis.objects[field] = self
@@ -88,11 +87,25 @@ function Bot:remove()
   self.field = 0
 end
 
+function Bot:draw(batch)
+  local frame
+  if self.path or not self.task then
+    frame = self.dir * 3 + ((self.anim < 0.167 and 1) or (self.anim < 0.500 and 2) or (self.anim < 0.833 and 3) or 1)
+  else
+    frame = 13 + math.floor(self.anim * 4)
+  end
+
+  local ox, oy = self:pos()
+  batch:add(self.fx.frames[frame], (ox - 1) * DIM, (oy - 1) * DIM, 0, 1, 1, 0, DIM)
+end
+
 function Bot:update(dt)
   if self.path then
     self.anim = self.anim + self.speed * dt
 
-    if self.anim > 1.0 then
+    if self.anim >= 1.0 then
+      self.fx.step:play()
+
       orbis.objects[self.field] = nil
 
       self.field = self.path[#self.path]

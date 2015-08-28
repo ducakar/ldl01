@@ -1,9 +1,9 @@
 local pathFields = {}
 
 orbis = {
-  width   = 16,
-  height  = 12,
-  length  = 16 * 12,
+  width   = 25,
+  height  = 15,
+  length  = 25 * 15,
   tiles   = {},
   objects = {},
   spaces  = {},
@@ -20,26 +20,26 @@ local function pathStep(path, depth, field)
   else
     pathFields[field] = depth
 
-    if depth >= 32 then
+    if depth >= 64 then
       return path
     else
       local minPath    = nil
-      local fieldUp    = field - orbis.width
       local fieldDown  = field + orbis.width
-      local fieldLeft  = field - 1
+      local fieldUp    = field - orbis.width
       local fieldRight = field + 1
+      local fieldLeft  = field - 1
 
-      if 1 <= fieldUp and orbis.spaces[fieldUp] then
-        minPath = pathStep(minPath, depth + 1, fieldUp)
-      end
       if fieldDown <= orbis.length and orbis.spaces[fieldDown] then
         minPath = pathStep(minPath, depth + 1, fieldDown)
       end
-      if 1 <= fieldLeft and orbis.spaces[fieldLeft] then
-        minPath = pathStep(minPath, depth + 1, fieldLeft)
+      if 1 <= fieldUp and orbis.spaces[fieldUp] then
+        minPath = pathStep(minPath, depth + 1, fieldUp)
       end
       if fieldRight <= orbis.length and orbis.spaces[fieldRight] then
         minPath = pathStep(minPath, depth + 1, fieldRight)
+      end
+      if 1 <= fieldLeft and orbis.spaces[fieldLeft] then
+        minPath = pathStep(minPath, depth + 1, fieldLeft)
       end
 
       if not minPath or (path and #path <= #minPath + 1) then
@@ -57,7 +57,7 @@ function orbis.field(x, y)
 end
 
 function orbis.pos(field)
-  return math.fmod(field - 1, orbis.width) + 1, math.floor((field - 1) / orbis.width + 1.0)
+  return 1 + math.fmod(field - 1, orbis.width), 1 + math.floor((field - 1) / orbis.width)
 end
 
 function orbis.findPath(srcField, destField)
@@ -89,8 +89,8 @@ function orbis.setTiles(tiles, tileTypes)
   end
 end
 
-function orbis.update(dt)
-  orbis.time = orbis.time + dt * 1
+function orbis.update(dt, timeWarp)
+  orbis.time = orbis.time + timeWarp * dt
 
   if orbis.time > 86400 then
     orbis.time = orbis.time - 86400

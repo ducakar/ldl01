@@ -1,34 +1,59 @@
-require 'orbis'
-
 local lg = love.graphics
+local lm = love.mouse
 
-local ASCII      = [[ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~]]
-local MARGINX    = 78
-local MARGINY    = 20
-local BOX_MARGIN = 2
+local ASCII        = [[ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~]]
+local MARGINX      = 78
+local MARGINY      = 20
+local BOX_MARGIN   = 2
 
-local boxX       = MARGINX
-local boxY       = MARGINY
-local boxWidth   = nil
-local boxHeight  = nil
-local textX      = boxX + BOX_MARGIN
-local textY      = boxY + BOX_MARGIN
-local textWidth  = nil
+local normalCursor = nil
+local hoverCursor  = nil
+local font         = nil
 
-local normalCursor, hoverCursor
+local mouseX       = 0
+local mouseY       = 0
 
-ui = {
-  text = nil,
-  choices = nil
-}
+local boxX         = MARGINX
+local boxY         = MARGINY
+local boxWidth     = nil
+local boxHeight    = nil
+local textX        = boxX + BOX_MARGIN
+local textY        = boxY + BOX_MARGIN
+local textWidth    = nil
+local textHeight   = nil
+local choiceX      = textX + 8
+local choiceY      = nil
+
+local message      = nil
+local choices      = {}
+
+ui = {}
+
+local function mouseInside(x, y, width, height)
+  return x <= mouseX and mouseX < x + width and y <= mouseY and mouseY < y + height
+end
+
+local function drawBox()
+  lg.setColor(80, 70, 60)
+  lg.rectangle('fill', boxX - 4, boxY - 4, boxWidth + 8, boxHeight + 8)
+  lg.setColor(0, 25, 20)
+  lg.rectangle('fill', boxX, boxY, boxWidth, boxHeight)
+end
 
 function ui.active()
   return ui.text
 end
 
 function ui.show(text, choices)
-  ui.text = text
+  ui.text    = text
   ui.choices = choices
+
+  if choices then
+    local _, lines = font:getWrap(text, textWidth)
+    choiceY = textY + lines * textHeight
+  else
+    choiceY = nil
+  end
 end
 
 function ui.keyPressed(key)
@@ -40,9 +65,18 @@ function ui.keyPressed(key)
 end
 
 function ui.mousePressed(x, y, button)
+  if choiceY then
+    for i, _ in ipairs(ui.choices) do
+      if mouseInside(boxX, choiceY + i * textHeight - 1, boxWidth, textHeight) then
+        ui.show()
+        break
+      end
+    end
+  end
 end
 
 function ui.mouseMoved(x, y)
+  mouseX, mouseY = x, y
 end
 
 function ui.draw()
@@ -56,29 +90,43 @@ function ui.draw()
   lg.printf(love.timer.getFPS(), WIDTH - 82, 11, 80, 'right')
 
   if ui.text then
-    lg.setColor(80, 70, 60)
-    lg.rectangle('fill', boxX - 4, boxY - 4, boxWidth + 8, boxHeight + 8)
-    lg.setColor(0, 25, 20)
-    lg.rectangle('fill', boxX, boxY, boxWidth, boxHeight)
-    lg.setColor(255, 255, 255)
+    drawBox()
+
+    lg.setColor(160, 160, 160)
     lg.printf(ui.text, textX, textY, textWidth)
-  else
-    lg.setColor(255, 255, 255)
+
+    if ui.choices then
+      for i, text in ipairs(ui.choices) do
+        local y = choiceY + i * textHeight - 1
+
+        if mouseInside(boxX, y, boxWidth, textHeight) then
+          lg.setColor(80, 255, 160)
+        else
+          lg.setColor(0, 160, 80)
+        end
+
+        lg.print(text, choiceX, y)
+      end
+    end
   end
+
+  lg.setColor(255, 255, 255)
 end
 
 function ui.update(dt)
 end
 
 function ui.init()
-  boxWidth  = WIDTH - 2 * MARGINX
-  boxHeight = HEIGHT - 2 * MARGINY
-  textWidth = boxWidth - 2 * BOX_MARGIN
+  normalCursor = lm.newCursor('base/normalCursor.png')
+  hoverCursor  = lm.newCursor('base/hoverCursor.png')
 
-  normalCursor = love.mouse.newCursor('base/normalCursor.png')
-  hoverCursor = love.mouse.newCursor('base/hoverCursor.png')
+  font         = lg.newImageFont('base/font.png', ASCII)
 
-  love.mouse.setCursor(normalCursor)
+  boxWidth     = WIDTH - 2 * MARGINX
+  boxHeight    = HEIGHT - 2 * MARGINY
+  textWidth    = boxWidth - 2 * BOX_MARGIN
+  textHeight   = font:getHeight() + font:getLineHeight()
 
-  lg.setFont(lg.newImageFont('base/font.png', ASCII))
+  lm.setCursor(normalCursor)
+  lg.setFont(font)
 end
