@@ -1,12 +1,11 @@
-require 'atlas'
-require 'game'
+local atlas = require 'atlas'
+local ui    = require 'ui'
+local game  = require 'game'
 
 local lg = love.graphics
 
-WIDTH  = 400
-HEIGHT = 240
-
 local canvas = {}
+local batch
 
 function love.keypressed(key)
   if key == 'f11' then
@@ -19,27 +18,27 @@ function love.keypressed(key)
 end
 
 function love.mousepressed(x, y, button)
-  local localX, localY = (x - canvas.offsetX) / canvas.width * WIDTH, (y - canvas.offsetY) / canvas.height * HEIGHT
+  local localX, localY = (x - canvas.offsetX) / canvas.width * atlas.WIDTH, (y - canvas.offsetY) / canvas.height * atlas.HEIGHT
   game.mousePressed(localX, localY, button)
 end
 
 function love.mousemoved(x, y)
-  local localX, localY = (x - canvas.offsetX) / canvas.width * WIDTH, (y - canvas.offsetY) / canvas.height * HEIGHT
+  local localX, localY = (x - canvas.offsetX) / canvas.width * atlas.WIDTH, (y - canvas.offsetY) / canvas.height * atlas.HEIGHT
   game.mouseMoved(localX, localY)
 end
 
 function love.resize(windowWidth, windowHeight)
-  local canvasRatio = WIDTH / HEIGHT
+  local canvasRatio = atlas.WIDTH / atlas.HEIGHT
   local windowRatio = windowWidth / windowHeight
 
   if canvasRatio < windowRatio then
-    canvas.scale   = windowHeight / HEIGHT
+    canvas.scale   = windowHeight / atlas.HEIGHT
     canvas.width   = windowHeight * canvasRatio
     canvas.height  = windowHeight
     canvas.offsetX = (windowWidth - canvas.width) / 2
     canvas.offsetY = 0
   else
-    canvas.scale   = windowWidth / WIDTH
+    canvas.scale   = windowWidth / atlas.WIDTH
     canvas.width   = windowWidth
     canvas.height  = windowWidth / canvasRatio
     canvas.offsetX = 0
@@ -47,7 +46,7 @@ function love.resize(windowWidth, windowHeight)
   end
 end
 
-function love.load(table)
+function love.load()
   local windowWidth, windowHeight = love.window.getDimensions()
 
   love.resize(windowWidth, windowHeight)
@@ -56,12 +55,16 @@ function love.load(table)
 
   lg.setDefaultFilter('nearest', 'nearest')
 
-  canvas.handle = lg.newCanvas(WIDTH, HEIGHT)
+  canvas.handle = lg.newCanvas(atlas.WIDTH, atlas.HEIGHT)
 
   atlas.init(batch)
   batch = lg.newSpriteBatch(atlas.image)
 
   game.init()
+end
+
+function love.quit()
+  game.quit()
 end
 
 function love.draw()

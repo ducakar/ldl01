@@ -1,14 +1,15 @@
-require 'orbis'
-require 'atlas'
+local orbis  = require 'orbis'
+local atlas  = require 'atlas'
 
-Bot = {
+local Bot = {
+  class = 'Bot',
   field = 0,
   dir   = 0,
   speed = 4.0,
   path  = nil,
   task  = false,
   anim  = 0.0,
-  fx    = {}
+  fx    = nil
 }
 Bot.__index = Bot
 
@@ -17,15 +18,12 @@ local function moveDir(bot)
   return (delta == -1 and 3) or (delta == 1 and 2) or (delta < 0 and 1) or 0
 end
 
-function Bot:init()
-  self.fx = {
-    step   = love.audio.newSource(atlas.step),
-    frames = atlas.robot
-  }
-end
-
 function Bot:new(o)
   o = o or {}
+  o.fx = {
+    step = love.audio.newSource(atlas.step),
+    frames = atlas.robot
+  }
   return setmetatable(o, self)
 end
 
@@ -96,7 +94,7 @@ function Bot:draw(batch)
   end
 
   local ox, oy = self:pos()
-  batch:add(self.fx.frames[frame], (ox - 1) * DIM, (oy - 1) * DIM, 0, 1, 1, 0, DIM)
+  batch:add(self.fx.frames[frame], (ox - 1) * atlas.DIM, (oy - 1) * atlas.DIM, 0, 1, 1, 0, atlas.DIM)
 end
 
 function Bot:update(dt)
@@ -131,3 +129,5 @@ function Bot:update(dt)
     self.anim = 0.0
   end
 end
+
+return Bot

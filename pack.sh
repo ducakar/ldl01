@@ -2,7 +2,7 @@
 
 version='0.0'
 images=`find base gfx -name '*.png' -o -name '*.jpg'`
-sounds=`find sfx -name '*.wav' -o -name '*.ogg'`
+sounds=`find base sfx -name '*.wav' -o -name '*.ogg'`
 scripts=`echo *.{lua,md}`
 
 optipng -o7 -zm1-9 ${images}

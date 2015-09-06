@@ -1,15 +1,16 @@
+local stream = require 'stream'
+
 local pathFields = {}
 
-orbis = {
-  width   = 25,
-  height  = 15,
-  length  = 25 * 15,
-  tiles   = {},
-  objects = {},
-  spaces  = {},
-  devices = {},
-  time    = 0,
-  day     = 1,
+local orbis = {
+  width     = 25,
+  height    = 15,
+  length    = 25 * 15,
+  tiles     = {},
+  externals = {},
+  spaces    = {},
+  objects   = {},
+  devices   = {}
 }
 
 local function pathStep(path, depth, field)
@@ -78,25 +79,44 @@ function orbis.setTiles(tiles, tileTypes)
     assert(#tiles == orbis.length)
 
     for i = 1, orbis.length do
-      orbis.tiles[i] = tiles[i]
-      orbis.spaces[i] = tileTypes[tiles[i]].space
+      orbis.tiles[i]     = tiles[i]
+      orbis.externals[i] = tileTypes[tiles[i]].external
+      orbis.spaces[i]    = tileTypes[tiles[i]].space
     end
   else
     for i = 1, orbis.length do
-      orbis.tiles[i] = 0
-      orbis.spaces[i] = true
+      orbis.tiles[i]     = 0
+      orbis.externals[i] = true
+      orbis.spaces[i]    = true
     end
   end
 end
 
-function orbis.update(dt, timeWarp)
-  orbis.time = orbis.time + timeWarp * dt
+function orbis.read(line)
+  local o = stream.read(line)
 
-  if orbis.time > 86400 then
-    orbis.time = orbis.time - 86400
-    orbis.day = orbis.day + 1
-  end
+  orbis.tiles     = o.tiles
+  orbis.externals = o.externals
+  orbis.spaces    = o.spaces
+  orbis.objects   = o.objects
+  orbis.devices   = o.devices
+end
 
+function orbis.write()
+  return stream.write({
+    tiles     = orbis.tiles,
+    externals = orbis.externals,
+    spaces    = orbis.spaces,
+    objects   = orbis.objects,
+    devices   = orbis.devices
+  })
+end
+
+function orbis.init()
+  orbis.setTiles()
+end
+
+function orbis.update(dt)
   for _, object in pairs(orbis.objects) do
     if object.update then
       object:update(dt)
@@ -104,6 +124,4 @@ function orbis.update(dt, timeWarp)
   end
 end
 
-function orbis.init()
-  orbis.setTiles()
-end
+return orbis

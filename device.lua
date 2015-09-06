@@ -8,7 +8,7 @@ local FIELDMASK_OFFSETS = {
   { -2, -2 }, { -1, -2 }, { 0, -2 }, { 1, 2 }, { 2, 2 }
 }
 
-Device = {
+local Device = {
   field = 0,
   fieldMask = {
     0, 0, 0, 0, 0,
@@ -96,3 +96,5 @@ end
 
 function Device:draw(batch)
 end
+
+return Device
