@@ -1,5 +1,3 @@
-local stream = require 'stream'
-
 local pathFields = {}
 
 local orbis = {
@@ -92,28 +90,22 @@ function orbis.setTiles(tiles, tileTypes)
   end
 end
 
-function orbis.read(line)
-  local o = stream.read(line)
-
-  orbis.tiles     = o.tiles
-  orbis.externals = o.externals
-  orbis.spaces    = o.spaces
-  orbis.objects   = o.objects
-  orbis.devices   = o.devices
-end
-
 function orbis.write()
-  return stream.write({
+  return {
     tiles     = orbis.tiles,
     externals = orbis.externals,
-    spaces    = orbis.spaces,
-    objects   = orbis.objects,
-    devices   = orbis.devices
-  })
+    spaces    = orbis.spaces
+  }
 end
 
-function orbis.init()
-  orbis.setTiles()
+function orbis.init(o)
+  if o then
+    orbis.tiles     = o.tiles
+    orbis.externals = o.externals
+    orbis.spaces    = o.spaces
+  else
+    orbis.setTiles()
+  end
 end
 
 function orbis.update(dt)

@@ -1,8 +1,8 @@
 #!/bin/sh
 
 version='0.0'
-images=`find base gfx -name '*.png' -o -name '*.jpg'`
-sounds=`find base sfx -name '*.wav' -o -name '*.ogg'`
+images=`find gfx -name '*.png' -o -name '*.jpg'`
+sounds=`find sfx -name '*.wav' -o -name '*.ogg' -o -name '*.mid'`
 scripts=`echo *.{lua,md}`
 
 optipng -o7 -zm1-9 ${images}

@@ -1,12 +1,4 @@
--- require 'orbis'
-
-local FIELDMASK_OFFSETS = {
-  { -2, -2 }, { -1, -2 }, { 0, -2 }, { 1, -2 }, { 2, -2 },
-  { -2, -2 }, { -1, -2 }, { 0, -2 }, { 1, -1 }, { 2, -1 },
-  { -2, -2 }, { -1, -2 }, { 0, -2 }, { 1, 0 }, { 2, 0 },
-  { -2, -2 }, { -1, -2 }, { 0, -2 }, { 1, 1 }, { 2, 1 },
-  { -2, -2 }, { -1, -2 }, { 0, -2 }, { 1, 2 }, { 2, 2 }
-}
+local orbis = require 'orbis'
 
 local Device = {
   field = 0,
@@ -20,7 +12,7 @@ local Device = {
 }
 Device.__index = Device
 
-function checkPlacement(device, centralField)
+local function checkPlacement(device, centralField)
   local centreX, centreY = orbis.pos(centralField)
 
   for y = -2, 2 do

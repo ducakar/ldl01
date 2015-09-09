@@ -80,16 +80,16 @@ function atlas.init()
   }
 
   for _, field in ipairs(atlas.FIELDS) do
-    field.quads = {}
-
     local floor = field.layers[1]
     local wall = field.layers[2]
+
+    field.quads = {}
 
     if floor then
       field.quads[1] = lg.newQuad(4 * atlas.DIM, floor * atlas.DIM, atlas.DIM, atlas.DIM, imageWidth, imageHeight)
     end
     if wall then
-      field.quads[2] = lg.newQuad((5 + math.floor(wall / 4)) * atlas.DIM, math.fmod(wall, 4) * DIMY, atlas.DIM, DIMY,
+      field.quads[2] = lg.newQuad((5 + math.floor(wall / 8)) * atlas.DIM, math.fmod(wall, 8) * DIMY, atlas.DIM, DIMY,
                                   imageWidth, imageHeight)
     end
   end

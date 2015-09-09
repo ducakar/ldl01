@@ -2,7 +2,6 @@ local orbis  = require 'orbis'
 local atlas  = require 'atlas'
 
 local Bot = {
-  class = 'Bot',
   field = 0,
   dir   = 0,
   speed = 4.0,
@@ -70,8 +69,6 @@ function Bot:setPathTo(destField)
 end
 
 function Bot:place(field)
-  assert(orbis.spaces[field])
-
   self.field = field
 
   orbis.objects[field] = self

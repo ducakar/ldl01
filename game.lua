@@ -1,30 +1,30 @@
-local orbis = require 'orbis'
-local net   = require 'net'
-local Bot   = require 'bot'
-local ui    = require 'ui'
-local atlas = require 'atlas'
+local orbis  = require 'orbis'
+local net    = require 'net'
+local Bot    = require 'Bot'
+local stream = require 'stream'
+local ui     = require 'ui'
+local atlas  = require 'atlas'
 
 local TILES = {
-  6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5,
-  4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-  4, 1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-  4, 1, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-  4, 1, 8, 7, 8, 7, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-  4, 1, 8, 7, 8, 7, 8, 7, 7, 7, 7, 7, 7, 7, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-  4, 1, 8, 7, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-  4, 1, 8, 7, 8, 7, 7, 8, 8, 8, 7, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-  4, 1, 8, 7, 8, 7, 7, 7, 8, 7, 7, 8, 7, 7, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-  4, 1, 8, 7, 8, 8, 7, 7, 8, 7, 7, 8, 7, 8, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-  4, 1, 8, 7, 7, 7, 7, 7, 8, 7, 8, 8, 7, 8, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-  4, 1, 8, 7, 7, 7, 7, 7, 8, 7, 7, 7, 7, 8, 7, 8, 1, 1, 1, 1, 1, 9, 1, 1, 3,
-  4, 1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-  4, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 3,
-  6, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 5
+  4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3,
+  6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5,
+  6, 1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
+  6, 1, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
+  6, 1, 8, 7, 8, 7, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 5,
+  6, 1, 8, 7, 8, 7, 8, 7, 7, 7, 7, 7, 7, 7, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
+  6, 1, 8, 7, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
+  6, 1, 8, 7, 8, 7, 7, 8, 8, 8, 7, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
+  6, 1, 8, 7, 8, 7, 7, 7, 8, 7, 7, 8, 7, 7, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
+  6, 1, 8, 7, 8, 8, 7, 7, 8, 7, 7, 8, 7, 8, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
+  6, 1, 8, 7, 7, 7, 7, 7, 8, 7, 8, 8, 7, 8, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
+  6, 1, 8, 7, 7, 7, 7, 7, 8, 7, 7, 7, 7, 8, 7, 8, 1, 1, 1, 1, 1, 9, 1, 1, 5,
+  6, 1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
+  6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5,
+  4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3
 }
 
 local actor = nil
-
-local game = {}
+local game  = {}
 
 function game.keyPressed(key)
   ui.keyPressed(key)
@@ -41,9 +41,9 @@ function game.keyPressed(key)
     net.timeWarp = 5
   elseif key == 'd' then
     ui.show([[
-    Uncompressing Linux ... Parsing ELF ... done.
-    Booting to kernel.
-    starting version 342 ...]],
+    Decompressing Linux... Parsing ELF... done.
+    Booting the kernel.
+    starting version 337]],
     { 'Yes', 'No' })
   end
 end
@@ -106,15 +106,29 @@ end
 function game.init()
   ui.init()
 
-  orbis.init()
-  orbis.setTiles(TILES, atlas.FIELDS)
+  local o = stream.read('autosave.lua')
 
-  actor = Bot:new()
-  actor:place(orbis.field(4, 4))
+  if o then
+    orbis.init(o.orbis)
+
+    local _, object = next(o.objects)
+
+    actor = Bot:new(object)
+    actor:place(actor.field)
+  else
+    orbis.init()
+    orbis.setTiles(TILES, atlas.FIELDS)
+
+    actor = Bot:new()
+    actor:place(orbis.field(4, 4))
+  end
 end
 
 function game.quit()
-  love.filesystem.write('autosave.lua', orbis.write())
+  stream.write('autosave.lua', {
+    orbis = orbis.write(),
+    objects = orbis.objects
+  })
 end
 
 function game.update(dt)
