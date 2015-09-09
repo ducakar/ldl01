@@ -54,7 +54,7 @@ local atlas = {
   }
 }
 
-local DIMY  = 32
+local DIMY = 32
 
 function atlas.init()
   atlas.image = lg.newImage('gfx/atlas.png')
@@ -101,6 +101,8 @@ function atlas.init()
     lg.newQuad(15 * atlas.DIM, 3 * atlas.DIM, atlas.DIM, atlas.DIM, imageWidth, imageHeight),
     lg.newQuad(15 * atlas.DIM, 4 * atlas.DIM, atlas.DIM, atlas.DIM, imageWidth, imageHeight)
   }
+
+  atlas.cross = lg.newQuad(15 * atlas.DIM, 15 * atlas.DIM, atlas.DIM, atlas.DIM, imageWidth, imageHeight)
 
   atlas.step = ls.newSoundData('sfx/footstep1.wav')
 end

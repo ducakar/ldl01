@@ -1,4 +1,9 @@
-local pathFields = {}
+local atlas = require 'atlas'
+local net   = require 'net'
+
+local pathFields     = {}
+local internalColour = { 255, 255, 255 }
+local externalColour = { 160, 160, 160 }
 
 local orbis = {
   width     = 25,
@@ -105,6 +110,66 @@ function orbis.init(o)
     orbis.spaces    = o.spaces
   else
     orbis.setTiles()
+  end
+end
+
+function orbis.draw(batch)
+  local colourFactor = 0.5 + math.min(0.5, math.max(-0.5, 0.7 * math.cos(net.time / 43200.0 * math.pi)))
+  local fieldBase    = 0
+
+  externalColour[1] = 255 + colourFactor * (100 - 255)
+  externalColour[2] = 255 + colourFactor * (100 - 255)
+  externalColour[3] = 255 + colourFactor * (140 - 255)
+
+  for y = 1, orbis.height + 1 do
+    for x = 1, orbis.width + 1 do
+      if x <= orbis.width then
+        local field = fieldBase + x
+        local floor = orbis.tiles[field]
+
+        if floor then
+          local quad = atlas.FIELDS[floor].quads[1]
+
+          if quad then
+            local colour = orbis.externals[field] and externalColour or internalColour
+
+            batch:setColor(colour[1], colour[2], colour[3])
+            batch:add(quad, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM)
+          end
+        end
+        -- if not orbis.spaces[field] then
+        --   batch:add(atlas.cross, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM)
+        -- end
+      end
+      if x <= orbis.width then
+        local field  = fieldBase - orbis.width + x
+        local object = orbis.objects[field]
+
+        if object then
+          local colour = orbis.externals[field] and externalColour or internalColour
+
+          batch:setColor(colour[1], colour[2], colour[3])
+          object:draw(batch)
+        end
+      end
+      if 1 < x then
+        local field = fieldBase -orbis.width + x - 1
+        local wall  = orbis.tiles[field]
+
+        if wall then
+          local quad = atlas.FIELDS[wall].quads[2]
+
+          if quad then
+            local colour = orbis.externals[field] and externalColour or internalColour
+
+            batch:setColor(colour[1], colour[2], colour[3])
+            batch:add(quad, (x - 2) * atlas.DIM, (y - 2) * atlas.DIM, 0, 1, 1, 0, atlas.DIM)
+          end
+        end
+      end
+    end
+
+    fieldBase = fieldBase + orbis.width
   end
 end
 

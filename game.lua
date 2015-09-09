@@ -1,9 +1,9 @@
-local orbis  = require 'orbis'
-local net    = require 'net'
-local Bot    = require 'Bot'
-local stream = require 'stream'
-local ui     = require 'ui'
 local atlas  = require 'atlas'
+local net    = require 'net'
+local orbis  = require 'orbis'
+local Bot    = require 'Bot'
+local ui     = require 'ui'
+local stream = require 'stream'
 
 local TILES = {
   4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3,
@@ -67,67 +67,36 @@ function game.mouseMoved(x, y)
 end
 
 function game.draw(batch)
-  local fieldBase = 0
-
-  for y = 1, orbis.height + 1 do
-    for x = 1, orbis.width + 1 do
-      local field = fieldBase + x
-
-      if x <= orbis.width then
-        local floor = orbis.tiles[field]
-        if floor then
-          local quad = atlas.FIELDS[floor].quads[1]
-          if quad then
-            batch:add(quad, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM)
-          end
-        end
-      end
-      if x <= orbis.width then
-        local object = orbis.objects[field - orbis.width]
-        if object then
-          object:draw(batch)
-        end
-      end
-      if 1 < x then
-        local wall = orbis.tiles[field - orbis.width - 1]
-        if wall then
-          local quad = atlas.FIELDS[wall].quads[2]
-          if quad then
-            batch:add(quad, (x - 2) * atlas.DIM, (y - 2) * atlas.DIM, 0, 1, 1, 0, atlas.DIM)
-          end
-        end
-      end
-    end
-
-    fieldBase = fieldBase + orbis.width
-  end
+  orbis.draw(batch)
 end
 
 function game.init()
   ui.init()
 
   local o = stream.read('autosave.lua')
+  -- o = nil
 
   if o then
+    net.init(o.net)
     orbis.init(o.orbis)
 
-    local _, object = next(o.objects)
-
-    actor = Bot:new(object)
-    actor:place(actor.field)
+    actor = Bot:new(o.actor)
+    actor:place()
   else
+    net.init()
     orbis.init()
     orbis.setTiles(TILES, atlas.FIELDS)
 
-    actor = Bot:new()
-    actor:place(orbis.field(4, 4))
+    actor = Bot:new({ field = orbis.field(4, 4) })
+    actor:place()
   end
 end
 
 function game.quit()
   stream.write('autosave.lua', {
+    net   = net.write(),
     orbis = orbis.write(),
-    objects = orbis.objects
+    actor = actor
   })
 end
 

@@ -1,5 +1,5 @@
-local orbis  = require 'orbis'
-local atlas  = require 'atlas'
+local atlas = require 'atlas'
+local orbis = require 'orbis'
 
 local Bot = {
   field = 0,
@@ -20,7 +20,7 @@ end
 function Bot:new(o)
   o = o or {}
   o.fx = {
-    step = love.audio.newSource(atlas.step),
+    step   = love.audio.newSource(atlas.step),
     frames = atlas.robot
   }
   return setmetatable(o, self)
@@ -39,7 +39,7 @@ end
 
 function Bot:setPathTo(destField)
   if self.path then
-    local srcField = self.path[#self.path]
+    local srcField     = self.path[#self.path]
     local oldDestField = self.path[1]
 
     orbis.spaces[oldDestField] = true
@@ -58,26 +58,24 @@ function Bot:setPathTo(destField)
     if self.path then
       table.remove(self.path)
 
-      self.dir = moveDir(self)
+      self.dir  = moveDir(self)
       self.task = false
       self.anim = 0.0
 
       orbis.spaces[self.field] = true
-      orbis.spaces[destField] = false
+      orbis.spaces[destField]  = false
     end
   end
 end
 
-function Bot:place(field)
-  self.field = field
-
-  orbis.objects[field] = self
-  orbis.spaces[field] = false
+function Bot:place()
+  orbis.objects[self.field] = self
+  orbis.spaces[self.field]  = self.path ~= nil
 end
 
 function Bot:remove()
   orbis.objects[self.field] = nil
-  orbis.spaces[self.field] = true
+  orbis.spaces[self.field]  = true
 
   self.field = 0
 end
@@ -104,13 +102,13 @@ function Bot:update(dt)
       orbis.objects[self.field] = nil
 
       self.field = self.path[#self.path]
-      self.anim = self.anim - 1.0
+      self.anim  = self.anim - 1.0
       table.remove(self.path)
 
       orbis.objects[self.field] = self
 
       if #self.path == 0 then
-        self.dir = 0
+        self.dir  = 0
         self.anim = 0.0
         self.path = nil
       else

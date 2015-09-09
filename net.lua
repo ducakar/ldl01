@@ -1,5 +1,3 @@
-local stream = require 'stream'
-
 local WARP_LEVELS = { 0.0, 1.0, 60.0, 3600.0, 86400.0 }
 
 local net = {
@@ -9,26 +7,22 @@ local net = {
   timeWarp = 3
 }
 
-function net.read(line)
-  print(line)
-  local o = stream.read(line)
-
-  net.servers  = o.servers
-  net.time     = o.time
-  net.day      = o.day
-  net.timeWarp = o.timeWarp
-end
-
 function net.write()
-  return stream.write({
+  return {
     servers  = net.servers,
     time     = net.time,
     day      = net.day,
     timeWarp = net.timeWarp
-  })
+  }
 end
 
-function net.init()
+function net.init(o)
+  if o then
+    net.servers  = o.servers
+    net.time     = o.time
+    net.day      = o.day
+    net.timeWarp = o.timeWarp
+  end
 end
 
 function net.update(dt)
