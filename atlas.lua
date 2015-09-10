@@ -1,6 +1,3 @@
-local lg = love.graphics
-local ls = love.sound
-
 local atlas = {
   WIDTH  = 400,
   HEIGHT = 240,
@@ -54,57 +51,57 @@ local atlas = {
   }
 }
 
-local DIMY = 32
+local imageWidth  = 0
+local imageHeight = 0
+
+local function quad(x, y, width, height)
+  return love.graphics.newQuad(x * atlas.DIM, y * atlas.DIM, width * atlas.DIM, height * atlas.DIM,
+                               imageWidth, imageHeight)
+end
+
+local function sprite(x, y, width, height, offsetX, offsetY)
+  return {
+    quad    = quad(x, y, width, height),
+    offsetX = (offsetX or 0) * atlas.DIM,
+    offsetY = (offsetY or 0) * atlas.DIM
+  }
+end
+
+local function sound(name)
+  return love.sound.newSoundData(string.format('sfx/%s.wav', name))
+end
 
 function atlas.init()
-  atlas.image = lg.newImage('gfx/atlas.png')
-  local imageWidth, imageHeight = atlas.image:getDimensions()
-
-  atlas.robot = {
-    lg.newQuad(0 * atlas.DIM, 0 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(0 * atlas.DIM, 1 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(0 * atlas.DIM, 2 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(1 * atlas.DIM, 0 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(1 * atlas.DIM, 1 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(1 * atlas.DIM, 2 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(2 * atlas.DIM, 0 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(2 * atlas.DIM, 1 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(2 * atlas.DIM, 2 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(3 * atlas.DIM, 0 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(3 * atlas.DIM, 1 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(3 * atlas.DIM, 2 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(0 * atlas.DIM, 3 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(1 * atlas.DIM, 3 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(2 * atlas.DIM, 3 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight),
-    lg.newQuad(3 * atlas.DIM, 3 * DIMY, atlas.DIM, DIMY, imageWidth, imageHeight)
-  }
+  atlas.image = love.graphics.newImage('gfx/atlas.png')
+  imageWidth, imageHeight = atlas.image:getDimensions()
 
   for _, field in ipairs(atlas.FIELDS) do
     local floor = field.layers[1]
-    local wall = field.layers[2]
+    local wall  = field.layers[2]
 
     field.quads = {}
 
     if floor then
-      field.quads[1] = lg.newQuad(4 * atlas.DIM, floor * atlas.DIM, atlas.DIM, atlas.DIM, imageWidth, imageHeight)
+      field.quads[1] = quad(4, floor, 1, 1)
     end
     if wall then
-      field.quads[2] = lg.newQuad((5 + math.floor(wall / 8)) * atlas.DIM, math.fmod(wall, 8) * DIMY, atlas.DIM, DIMY,
-                                  imageWidth, imageHeight)
+      field.quads[2] = quad(5 + math.floor(wall / 8), math.fmod(wall, 8) * 2, 1, 2)
     end
   end
 
-  atlas.timeWarp = {
-    lg.newQuad(15 * atlas.DIM, 0 * atlas.DIM, atlas.DIM, atlas.DIM, imageWidth, imageHeight),
-    lg.newQuad(15 * atlas.DIM, 1 * atlas.DIM, atlas.DIM, atlas.DIM, imageWidth, imageHeight),
-    lg.newQuad(15 * atlas.DIM, 2 * atlas.DIM, atlas.DIM, atlas.DIM, imageWidth, imageHeight),
-    lg.newQuad(15 * atlas.DIM, 3 * atlas.DIM, atlas.DIM, atlas.DIM, imageWidth, imageHeight),
-    lg.newQuad(15 * atlas.DIM, 4 * atlas.DIM, atlas.DIM, atlas.DIM, imageWidth, imageHeight)
+  atlas.robot = {
+    sprite(0, 0, 1, 2, 0, 1), sprite(0, 2, 1, 2, 0, 1), sprite(0, 4, 1, 2, 0, 1),
+    sprite(1, 0, 1, 2, 0, 1), sprite(1, 2, 1, 2, 0, 1), sprite(1, 4, 1, 2, 0, 1),
+    sprite(2, 0, 1, 2, 0, 1), sprite(2, 2, 1, 2, 0, 1), sprite(2, 4, 1, 2, 0, 1),
+    sprite(3, 0, 1, 2, 0, 1), sprite(3, 2, 1, 2, 0, 1), sprite(3, 4, 1, 2, 0, 1),
+    sprite(0, 6, 1, 2, 0, 1), sprite(1, 6, 1, 2, 0, 1), sprite(2, 6, 1, 2, 0, 1), sprite(3, 6, 1, 2, 0, 1)
   }
 
-  atlas.cross = lg.newQuad(15 * atlas.DIM, 15 * atlas.DIM, atlas.DIM, atlas.DIM, imageWidth, imageHeight)
+  atlas.server   = sprite(0, 8, 3, 3, 1, 1)
+  atlas.timeWarp = { quad(15, 0, 1, 1), quad(15, 1, 1, 1), quad(15, 2, 1, 1), quad(15, 3, 1, 1), quad(15, 4, 1, 1) }
+  atlas.cross    = quad(15, 15, 1, 1)
 
-  atlas.step = ls.newSoundData('sfx/footstep1.wav')
+  atlas.step     = sound('footstep1')
 end
 
 return atlas

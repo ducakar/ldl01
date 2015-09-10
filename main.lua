@@ -1,8 +1,7 @@
 local atlas = require 'atlas'
 local ui    = require 'ui'
 local game  = require 'game'
-
-local lg = love.graphics
+local lg    = love.graphics
 
 local canvas = {}
 local batch

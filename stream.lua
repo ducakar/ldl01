@@ -6,17 +6,17 @@ local function write(value, indent)
   if t == 'nil' or t == 'boolean' or t == 'number' then
     return tostring(value)
   elseif t == 'string' then
-    return '"' .. value .. '"'
+    return string.format('"%s"', value)
   elseif t == 'table' then
     local s = '{\n'
 
     for i, v in pairs(value) do
       local is, vs = write(i, ''), write(v, indent .. '  ')
       if is and vs then
-        s = s .. indent .. '  [' .. is .. '] = ' .. vs .. (next(value, i) and ',\n' or '\n')
+        s = string.format('%s%s  [%s] = %s', s, indent, is, vs) .. (next(value, i) and ',\n' or '\n')
       end
     end
-    return s .. indent .. '}'
+    return string.format('%s%s}', s, indent)
   end
 end
 
@@ -24,7 +24,11 @@ function stream.read(file)
   local buffer = love.filesystem.read(file)
 
   if buffer then
-    return load(buffer, 'chunk', 't')()
+    local chunk = load(buffer, 'chunk', 't')
+
+    if chunk then
+      return chunk()
+    end
   end
 end
 

@@ -89,7 +89,9 @@ function Bot:draw(batch)
   end
 
   local ox, oy = self:pos()
-  batch:add(self.fx.frames[frame], (ox - 1) * atlas.DIM, (oy - 1) * atlas.DIM, 0, 1, 1, 0, atlas.DIM)
+  local sprite = self.fx.frames[frame]
+
+  batch:add(sprite.quad, (ox - 1) * atlas.DIM, (oy - 1) * atlas.DIM, 0, 1, 1, sprite.offsetX, sprite.offsetY)
 end
 
 function Bot:update(dt)

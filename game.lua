@@ -2,6 +2,7 @@ local atlas  = require 'atlas'
 local net    = require 'net'
 local orbis  = require 'orbis'
 local Bot    = require 'Bot'
+local Device = require 'Device'
 local ui     = require 'ui'
 local stream = require 'stream'
 
@@ -23,15 +24,15 @@ local TILES = {
   4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3
 }
 
-local actor = nil
-local game  = {}
+local actor  = nil
+local server = nil
+
+local game = {}
 
 function game.keyPressed(key)
   ui.keyPressed(key)
 
-  if key == '`' then
-    net.timeWarp = 1
-  elseif key == '1' then
+  if key == '1' then
     net.timeWarp = 2
   elseif key == '2' then
     net.timeWarp = 3
@@ -80,8 +81,14 @@ function game.init()
     net.init(o.net)
     orbis.init(o.orbis)
 
-    actor = Bot:new(o.actor)
-    actor:place()
+    for field, obj in pairs(o.objects) do
+      if field == o.actorField then
+        actor = Bot:new(obj)
+        actor:place()
+      else
+        Device:new(obj):place()
+      end
+    end
   else
     net.init()
     orbis.init()
@@ -89,14 +96,18 @@ function game.init()
 
     actor = Bot:new({ field = orbis.field(4, 4) })
     actor:place()
+
+    server = Device:new({ field = orbis.field(12, 6) })
+    server:place()
   end
 end
 
 function game.quit()
   stream.write('autosave.lua', {
-    net   = net.write(),
-    orbis = orbis.write(),
-    actor = actor
+    net        = net.write(),
+    orbis      = orbis.write(),
+    objects    = orbis.objects,
+    actorField = actor.field
   })
 end
 

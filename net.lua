@@ -4,7 +4,7 @@ local net = {
   servers = {},
   time     = 0.0,
   day      = 1,
-  timeWarp = 3
+  timeWarp = 2
 }
 
 function net.write()

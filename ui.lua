@@ -1,8 +1,7 @@
 local atlas = require 'atlas'
 local net   = require 'net'
-
-local lg = love.graphics
-local lm = love.mouse
+local lg    = love.graphics
+local lm    = love.mouse
 
 local ASCII      = [[ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~]]
 local MARGINX    = 78
