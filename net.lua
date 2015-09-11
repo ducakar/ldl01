@@ -2,9 +2,12 @@ local WARP_LEVELS = { 0.0, 1.0, 60.0, 3600.0, 86400.0 }
 
 local net = {
   servers = {},
-  time     = 0.0,
-  day      = 1,
-  timeWarp = 2
+  time      = 0.0,
+  day       = 1,
+  timeWarp  = 2,
+  cores     = 1200000,
+  freeCores = 200000,
+  money     = 1234567890
 }
 
 function net.write()

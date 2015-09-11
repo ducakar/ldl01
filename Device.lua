@@ -1,26 +1,13 @@
 local atlas = require 'atlas'
 local orbis = require 'orbis'
 
-local Device = {
-  field = 0,
-  fieldMask = {
-    0, 0, 0, 0, 0,
-    3, 3, 3, 2, 3,
-    3, 1, 1, 1, 3,
-    3, 3, 3, 3, 3,
-    0, 0, 0, 0, 0
-  },
-  fx = nil
+local Device = orbis.Object:new {
+  field     = 0,
+  fieldMask = nil,
+  progress  = 1.0,
+  fx        = nil
 }
 Device.__index = Device
-
-function Device:new(o)
-  o = o or {}
-  o.fx = {
-    sprite = atlas.server
-  }
-  return setmetatable(o, self)
-end
 
 function Device:pos()
   return orbis.pos(self.field)
@@ -57,6 +44,7 @@ function Device:place()
 
       if value == 1 then
         orbis.spaces[field] = false
+        orbis.triggers[field] = self
       elseif value == 2 then
         orbis.devices[field] = self
       end
@@ -74,6 +62,7 @@ function Device:remove()
 
       if value == 1 then
         orbis.spaces[field] = true
+        orbis.triggers[field] = nil
       elseif value == 2 then
         orbis.devices[field] = nil
       end
@@ -89,5 +78,53 @@ function Device:draw(batch)
 
   batch:add(sprite.quad, (ox - 1) * atlas.DIM, (oy - 1) * atlas.DIM, 0, 1, 1, sprite.offsetX, sprite.offsetY)
 end
+
+Device.Server = Device:new {
+  class = 'Server',
+  fieldMask = {
+    0, 0, 0, 0, 0,
+    3, 3, 2, 3, 3,
+    3, 1, 1, 1, 3,
+    3, 3, 3, 3, 3,
+    0, 0, 0, 0, 0
+  },
+  fx = {
+    sprite = atlas.server
+  }
+}
+Device.Server.__index = Device.Server
+
+Device.Switch = Device:new {
+  class = 'Switch',
+  fieldMask = {
+    0, 0, 0, 0, 0,
+    3, 3, 2, 3, 0,
+    3, 1, 1, 3, 0,
+    3, 3, 3, 3, 0,
+    0, 0, 0, 0, 0
+  },
+  fx = {
+    sprite = atlas.switch
+  }
+}
+Device.Switch.__index = Device.Switch
+
+Device.Warning = Device:new {
+  class = 'Warning',
+  fieldMask = {
+    0, 0, 0, 0, 0,
+    0, 3, 3, 3, 0,
+    0, 3, 1, 3, 0,
+    0, 3, 3, 3, 0
+  },
+  fx = {
+    sprite = atlas.warning
+  }
+}
+Device.Warning.__index = Device.Warning
+
+orbis.Object.Server  = Device.Server
+orbis.Object.Switch  = Device.Switch
+orbis.Object.Warning = Device.Warning
 
 return Device

@@ -3,7 +3,7 @@ local net   = require 'net'
 local lg    = love.graphics
 local lm    = love.mouse
 
-local ASCII      = [[ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~]]
+local ASCII      = [[ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~€]]
 local MARGINX    = 78
 local MARGINY    = 20
 local BOX_MARGIN = 2
@@ -29,6 +29,22 @@ local ui = {}
 
 local function mouseInside(x, y, width, height)
   return x <= mouseX and mouseX < x + width and y <= mouseY and mouseY < y + height
+end
+
+local function unitNum(x)
+  if x > 1.0e18 then
+    return string.format('%.2f trl', x / 1.0e18)
+  elseif x > 1.0e15 then
+    return string.format('%.2f brd', x / 1.0e15)
+  elseif x > 1.0e12 then
+    return string.format('%.2f bil', x / 1.0e12)
+  elseif x > 1.0e9 then
+    return string.format('%.2f mrd', x / 1.0e9)
+  elseif x > 1.0e6 then
+    return string.format('%.2f mil', x / 1.0e6)
+  else
+    return string.format('%d', x)
+  end
 end
 
 local function drawBox()
@@ -81,13 +97,16 @@ function ui.mouseMoved(x, y)
 end
 
 function ui.draw()
-  local hour     = math.floor(net.time / 3600)
-  local minute   = math.floor(math.fmod(net.time, 3600) / 60)
-  local timeText = string.format('Day %d %02d:%02d', net.day, hour, minute)
+  local hour      = math.floor(net.time / 3600)
+  local minute    = math.floor(math.fmod(net.time, 3600) / 60)
+  local timeText  = string.format('Day %d %02d:%02d', net.day, hour, minute)
+  local statsText = string.format('%s (%s) CPUs\n%s €', unitNum(net.cores), unitNum(net.freeCores), unitNum(net.money))
 
-  lg.setColor(120, 160, 120)
-  lg.printf(timeText, atlas.WIDTH - 82, 2, 80, 'right')
+  lg.setColor(160, 220, 160)
+  lg.printf(statsText, 2, 2, 200, 'left')
+  lg.printf(timeText, atlas.WIDTH - 202, 2, 200, 'right')
   lg.draw(atlas.image, atlas.timeWarp[ui.active() and 1 or net.timeWarp], atlas.WIDTH - atlas.DIM, textHeight)
+  lg.printf(string.format('%d FPS', love.timer.getFPS()), atlas.WIDTH - 102, 20, 100, 'right')
 
   if ui.text then
     drawBox()

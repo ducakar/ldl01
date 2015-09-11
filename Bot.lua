@@ -1,29 +1,24 @@
 local atlas = require 'atlas'
 local orbis = require 'orbis'
 
-local Bot = {
+local Bot = orbis.Object:new {
+  class = 'Bot',
   field = 0,
   dir   = 0,
   speed = 4.0,
   path  = nil,
   task  = false,
   anim  = 0.0,
-  fx    = nil
+  fx    = {
+    frames = atlas.robot,
+    step   = love.audio.newSource(atlas.step)
+  }
 }
 Bot.__index = Bot
 
 local function moveDir(bot)
   local delta = bot.path[#bot.path] - bot.field
   return (delta == -1 and 3) or (delta == 1 and 2) or (delta < 0 and 1) or 0
-end
-
-function Bot:new(o)
-  o = o or {}
-  o.fx = {
-    step   = love.audio.newSource(atlas.step),
-    frames = atlas.robot
-  }
-  return setmetatable(o, self)
 end
 
 function Bot:pos()
@@ -39,19 +34,11 @@ end
 
 function Bot:setPathTo(destField)
   if self.path then
-    local srcField     = self.path[#self.path]
-    local oldDestField = self.path[1]
+    orbis.spaces[self.path[1]] = true
 
-    orbis.spaces[oldDestField] = true
+    self.path = orbis.findPath(self.path[#self.path], destField) or self.path
 
-    self.path = orbis.findPath(srcField, destField)
-
-    if self.path then
-      orbis.spaces[destField] = false
-    else
-      self.path = { srcField }
-      orbis.spaces[srcField] = false
-    end
+    orbis.spaces[self.path[1]] = false
   else
     self.path = orbis.findPath(self.field, destField)
 
@@ -63,19 +50,24 @@ function Bot:setPathTo(destField)
       self.anim = 0.0
 
       orbis.spaces[self.field] = true
-      orbis.spaces[destField]  = false
+      orbis.spaces[destField] = false
     end
   end
 end
 
 function Bot:place()
   orbis.objects[self.field] = self
-  orbis.spaces[self.field]  = self.path ~= nil
+
+  if self.path then
+    orbis.spaces[self.path[1]] = false
+  else
+    orbis.spaces[self.field] = false
+  end
 end
 
 function Bot:remove()
   orbis.objects[self.field] = nil
-  orbis.spaces[self.field]  = true
+  orbis.spaces[self.field] = true
 
   self.field = 0
 end
@@ -126,5 +118,7 @@ function Bot:update(dt)
     self.anim = 0.0
   end
 end
+
+orbis.Object.Bot = Bot
 
 return Bot

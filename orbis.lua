@@ -1,20 +1,38 @@
 local atlas = require 'atlas'
 local net   = require 'net'
 
+local WIDTH          = 26
+local HEIGHT         = 15
+
 local pathFields     = {}
 local internalColour = { 255, 255, 255 }
 local externalColour = { 160, 160, 160 }
+local internalsBatch = love.graphics.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'static')
+local externalsBatch = love.graphics.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'static')
+local objectsBatch   = love.graphics.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'stream')
 
 local orbis = {
-  width     = 25,
-  height    = 15,
-  length    = 25 * 15,
+  Object    = {
+    field   = nil
+  },
+  width     = WIDTH,
+  height    = HEIGHT,
+  length    = WIDTH * HEIGHT,
+  map       = nil,
   tiles     = {},
   externals = {},
   spaces    = {},
   objects   = {},
-  devices   = {}
+  devices   = {},
+  triggers  = {}
 }
+orbis.Object.__index = orbis.Object
+
+function orbis.Object:new(o)
+  o = o or {}
+  o.class = o.class or self.class
+  return setmetatable(o, self)
+end
 
 local function pathStep(path, depth, field)
   if pathFields[field] == 0 then
@@ -77,43 +95,59 @@ function orbis.findPath(srcField, destField)
   end
 end
 
-function orbis.setTiles(tiles, tileTypes)
-  if tiles then
-    assert(#tiles == orbis.length)
-
-    for i = 1, orbis.length do
-      orbis.tiles[i]     = tiles[i]
-      orbis.externals[i] = tileTypes[tiles[i]].external
-      orbis.spaces[i]    = tileTypes[tiles[i]].space
-    end
-  else
-    for i = 1, orbis.length do
-      orbis.tiles[i]     = 0
-      orbis.externals[i] = true
-      orbis.spaces[i]    = true
-    end
-  end
-end
-
 function orbis.write()
   return {
-    tiles     = orbis.tiles,
-    externals = orbis.externals,
-    spaces    = orbis.spaces
+    map     = orbis.map,
+    objects = orbis.objects
   }
 end
 
 function orbis.init(o)
-  if o then
-    orbis.tiles     = o.tiles
-    orbis.externals = o.externals
-    orbis.spaces    = o.spaces
-  else
-    orbis.setTiles()
+  local tiles = require(o.map)
+
+  assert(#tiles == orbis.length)
+
+  orbis.map = o.map
+
+  for i = 1, orbis.length do
+    orbis.tiles[i]     = tiles[i]
+    orbis.externals[i] = atlas.FIELDS[tiles[i]].external
+    orbis.spaces[i]    = atlas.FIELDS[tiles[i]].space
+  end
+
+  if o.objects then
+    for _, obj in pairs(o.objects) do
+      orbis.Object[obj.class]:new(obj):place()
+    end
+  end
+
+  internalsBatch:clear()
+  externalsBatch:clear()
+
+  local fieldBase = 0
+
+  for y = 1, orbis.height do
+    for x = 1, orbis.width do
+      local field = fieldBase + x
+      local floor = orbis.tiles[field]
+
+      if floor then
+        local fieldInfo = atlas.FIELDS[floor]
+        local quad      = fieldInfo.quads[1]
+
+        if quad then
+          local batch = fieldInfo.external and externalsBatch or internalsBatch
+
+          batch:add(quad, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM)
+        end
+      end
+    end
+
+    fieldBase = fieldBase + orbis.width
   end
 end
 
-function orbis.draw(batch)
+function orbis.draw()
   local colourFactor = 0.5 + math.min(0.5, math.max(-0.5, 0.7 * math.cos(net.time / 43200.0 * math.pi)))
   local fieldBase    = 0
 
@@ -121,26 +155,18 @@ function orbis.draw(batch)
   externalColour[2] = 255 + colourFactor * (100 - 255)
   externalColour[3] = 255 + colourFactor * (140 - 255)
 
+  love.graphics.setColor(internalColour[1], internalColour[2], internalColour[3])
+  love.graphics.draw(internalsBatch)
+  love.graphics.setColor(externalColour[1], externalColour[2], externalColour[3])
+  love.graphics.draw(externalsBatch)
+
   for y = 1, orbis.height + 1 do
     for x = 1, orbis.width + 1 do
-      if x <= orbis.width then
-        local field = fieldBase + x
-        local floor = orbis.tiles[field]
-
-        if floor then
-          local quad = atlas.FIELDS[floor].quads[1]
-
-          if quad then
-            local colour = orbis.externals[field] and externalColour or internalColour
-
-            batch:setColor(colour[1], colour[2], colour[3])
-            batch:add(quad, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM)
-          end
-        end
-        -- if not orbis.spaces[field] then
-        --   batch:add(atlas.cross, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM)
-        -- end
-      end
+      -- if x <= orbis.width then
+      --   if not orbis.spaces[field] then
+      --     batch:add(atlas.cross, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM)
+      --   end
+      -- end
       if x <= orbis.width then
         local field  = fieldBase - orbis.width + x
         local object = orbis.objects[field]
@@ -148,8 +174,8 @@ function orbis.draw(batch)
         if object then
           local colour = orbis.externals[field] and externalColour or internalColour
 
-          batch:setColor(colour[1], colour[2], colour[3])
-          object:draw(batch)
+          objectsBatch:setColor(colour[1], colour[2], colour[3])
+          object:draw(objectsBatch)
         end
       end
       if 1 < x then
@@ -162,8 +188,8 @@ function orbis.draw(batch)
           if quad then
             local colour = orbis.externals[field] and externalColour or internalColour
 
-            batch:setColor(colour[1], colour[2], colour[3])
-            batch:add(quad, (x - 2) * atlas.DIM, (y - 2) * atlas.DIM, 0, 1, 1, 0, atlas.DIM)
+            objectsBatch:setColor(colour[1], colour[2], colour[3])
+            objectsBatch:add(quad, (x - 2) * atlas.DIM, (y - 2) * atlas.DIM, 0, 1, 1, 0, atlas.DIM)
           end
         end
       end
@@ -171,6 +197,9 @@ function orbis.draw(batch)
 
     fieldBase = fieldBase + orbis.width
   end
+
+  love.graphics.draw(objectsBatch)
+  objectsBatch:clear()
 end
 
 function orbis.update(dt)

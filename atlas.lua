@@ -1,5 +1,5 @@
 local atlas = {
-  WIDTH  = 400,
+  WIDTH  = 416,
   HEIGHT = 240,
   DIM    = 16,
   FIELDS = {
@@ -44,9 +44,9 @@ local atlas = {
       external = false
     },
     {
-      layers = { 0, 2 },
+      layers = { nil, 1 },
       space = false,
-      external = true
+      external = false
     }
   }
 }
@@ -97,7 +97,9 @@ function atlas.init()
     sprite(0, 6, 1, 2, 0, 1), sprite(1, 6, 1, 2, 0, 1), sprite(2, 6, 1, 2, 0, 1), sprite(3, 6, 1, 2, 0, 1)
   }
 
-  atlas.server   = sprite(0, 8, 3, 3, 1, 1)
+  atlas.server   = sprite(0, 8, 3, 2, 1, 1)
+  atlas.switch   = sprite(3, 8, 2, 2, 1, 1)
+  atlas.warning  = sprite(4, 10, 1, 2, 0, 1)
   atlas.timeWarp = { quad(15, 0, 1, 1), quad(15, 1, 1, 1), quad(15, 2, 1, 1), quad(15, 3, 1, 1), quad(15, 4, 1, 1) }
   atlas.cross    = quad(15, 15, 1, 1)
 

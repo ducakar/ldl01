@@ -1,8 +1,7 @@
 local atlas = require 'atlas'
-local ui    = require 'ui'
-local game  = require 'game'
 local lg    = love.graphics
 
+local stage
 local canvas = {}
 local batch
 
@@ -11,19 +10,27 @@ function love.keypressed(key)
     love.window.setFullscreen(not love.window.getFullscreen(), 'desktop')
   elseif key == 'escape' then
     love.event.quit()
-  else
-    game.keyPressed(key)
+  elseif stage then
+    stage.keyPressed(key)
   end
 end
 
 function love.mousepressed(x, y, button)
-  local localX, localY = (x - canvas.offsetX) / canvas.width * atlas.WIDTH, (y - canvas.offsetY) / canvas.height * atlas.HEIGHT
-  game.mousePressed(localX, localY, button)
+  if stage then
+    local localX = (x - canvas.offsetX) / canvas.width * atlas.WIDTH
+    local localY = (y - canvas.offsetY) / canvas.height * atlas.HEIGHT
+
+    stage.mousePressed(localX, localY, button)
+  end
 end
 
 function love.mousemoved(x, y)
-  local localX, localY = (x - canvas.offsetX) / canvas.width * atlas.WIDTH, (y - canvas.offsetY) / canvas.height * atlas.HEIGHT
-  game.mouseMoved(localX, localY)
+  if stage then
+    local localX = (x - canvas.offsetX) / canvas.width * atlas.WIDTH
+    local localY = (y - canvas.offsetY) / canvas.height * atlas.HEIGHT
+
+    stage.mouseMoved(localX, localY)
+  end
 end
 
 function love.resize(windowWidth, windowHeight)
@@ -59,20 +66,20 @@ function love.load()
   atlas.init(batch)
   batch = lg.newSpriteBatch(atlas.image)
 
-  game.init()
+  stage = require 'game'
+  stage.init()
 end
 
 function love.quit()
-  game.quit()
+  stage.quit()
 end
 
 function love.draw()
-  game.draw(batch)
-
   lg.setCanvas(canvas.handle)
   lg.clear()
-  lg.draw(batch)
-  ui.draw()
+
+  stage.draw()
+
   lg.setCanvas()
   lg.draw(canvas.handle, canvas.offsetX, canvas.offsetY, 0, canvas.scale, canvas.scale)
 
@@ -80,5 +87,5 @@ function love.draw()
 end
 
 function love.update(dt)
-  game.update(dt)
+  stage.update(dt)
 end

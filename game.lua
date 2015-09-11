@@ -6,26 +6,7 @@ local Device = require 'Device'
 local ui     = require 'ui'
 local stream = require 'stream'
 
-local TILES = {
-  4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3,
-  6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5,
-  6, 1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
-  6, 1, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
-  6, 1, 8, 7, 8, 7, 8, 8, 7, 7, 7, 7, 7, 7, 7, 7, 1, 1, 1, 1, 1, 1, 1, 1, 5,
-  6, 1, 8, 7, 8, 7, 8, 7, 7, 7, 7, 7, 7, 7, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
-  6, 1, 8, 7, 8, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
-  6, 1, 8, 7, 8, 7, 7, 8, 8, 8, 7, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
-  6, 1, 8, 7, 8, 7, 7, 7, 8, 7, 7, 8, 7, 7, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
-  6, 1, 8, 7, 8, 8, 7, 7, 8, 7, 7, 8, 7, 8, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
-  6, 1, 8, 7, 7, 7, 7, 7, 8, 7, 8, 8, 7, 8, 7, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
-  6, 1, 8, 7, 7, 7, 7, 7, 8, 7, 7, 7, 7, 8, 7, 8, 1, 1, 1, 1, 1, 9, 1, 1, 5,
-  6, 1, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 8, 1, 1, 1, 1, 1, 1, 1, 1, 5,
-  6, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 5,
-  4, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 3
-}
-
-local actor  = nil
-local server = nil
+local actor = nil
 
 local game = {}
 
@@ -67,10 +48,6 @@ function game.mouseMoved(x, y)
   end
 end
 
-function game.draw(batch)
-  orbis.draw(batch)
-end
-
 function game.init()
   ui.init()
 
@@ -80,35 +57,35 @@ function game.init()
   if o then
     net.init(o.net)
     orbis.init(o.orbis)
-
-    for field, obj in pairs(o.objects) do
-      if field == o.actorField then
-        actor = Bot:new(obj)
-        actor:place()
-      else
-        Device:new(obj):place()
-      end
-    end
   else
     net.init()
-    orbis.init()
-    orbis.setTiles(TILES, atlas.FIELDS)
+    orbis.init({ map = 'maps/warehouse' })
 
-    actor = Bot:new({ field = orbis.field(4, 4) })
-    actor:place()
+    Bot:new({ field = orbis.field(4, 4) }):place()
 
-    server = Device:new({ field = orbis.field(12, 6) })
-    server:place()
+    Device.Warning:new({ field = orbis.field(23, 13) }):place()
+    Device.Server:new({ field = orbis.field(12, 6) }):place()
+    Device.Switch:new({ field = orbis.field(20, 10) }):place()
+  end
+
+  for _, obj in pairs(orbis.objects) do
+    if obj.class == 'Bot' then
+      actor = obj
+      break
+    end
   end
 end
 
 function game.quit()
   stream.write('autosave.lua', {
-    net        = net.write(),
-    orbis      = orbis.write(),
-    objects    = orbis.objects,
-    actorField = actor.field
+    net   = net.write(),
+    orbis = orbis.write()
   })
+end
+
+function game.draw()
+  orbis.draw()
+  ui.draw()
 end
 
 function game.update(dt)
