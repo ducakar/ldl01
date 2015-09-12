@@ -2,6 +2,7 @@ local atlas = require 'atlas'
 local net   = require 'net'
 local lg    = love.graphics
 local lm    = love.mouse
+local lt    = love.timer
 
 local ASCII      = [[ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~€]]
 local MARGINX    = 78
@@ -33,15 +34,17 @@ end
 
 local function unitNum(x)
   if x > 1.0e18 then
-    return string.format('%.2f trl', x / 1.0e18)
+    return string.format('%.3gE', x / 1.0e18)
   elseif x > 1.0e15 then
-    return string.format('%.2f brd', x / 1.0e15)
+    return string.format('%.3gP', x / 1.0e15)
   elseif x > 1.0e12 then
-    return string.format('%.2f bil', x / 1.0e12)
+    return string.format('%.3gT', x / 1.0e12)
   elseif x > 1.0e9 then
-    return string.format('%.2f mrd', x / 1.0e9)
+    return string.format('%.3gG', x / 1.0e9)
   elseif x > 1.0e6 then
-    return string.format('%.2f mil', x / 1.0e6)
+    return string.format('%.3gM', x / 1.0e6)
+  elseif x > 1.0e3 then
+    return string.format('%.3gk', x / 1.0e3)
   else
     return string.format('%d', x)
   end
@@ -100,13 +103,13 @@ function ui.draw()
   local hour      = math.floor(net.time / 3600)
   local minute    = math.floor(math.fmod(net.time, 3600) / 60)
   local timeText  = string.format('Day %d %02d:%02d', net.day, hour, minute)
-  local statsText = string.format('%s (%s) CPUs\n%s €', unitNum(net.cores), unitNum(net.freeCores), unitNum(net.money))
+  local statsText = string.format('%s (%s) Cores\n%s €', unitNum(net.cores), unitNum(net.freeCores), unitNum(net.money))
 
   lg.setColor(160, 220, 160)
   lg.printf(statsText, 2, 2, 200, 'left')
   lg.printf(timeText, atlas.WIDTH - 202, 2, 200, 'right')
   lg.draw(atlas.image, atlas.timeWarp[ui.active() and 1 or net.timeWarp], atlas.WIDTH - atlas.DIM, textHeight)
-  lg.printf(string.format('%d FPS', love.timer.getFPS()), atlas.WIDTH - 102, 20, 100, 'right')
+  lg.printf(string.format('%d FPS', lt.getFPS()), atlas.WIDTH - 102, 2 + textHeight + atlas.DIM, 100, 'right')
 
   if ui.text then
     drawBox()

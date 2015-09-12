@@ -1,3 +1,5 @@
+local lf = love.filesystem
+
 local stream = {}
 
 local function write(value, indent)
@@ -6,7 +8,7 @@ local function write(value, indent)
   if t == 'nil' or t == 'boolean' or t == 'number' then
     return tostring(value)
   elseif t == 'string' then
-    return string.format('"%s"', value)
+    return string.format("'%s'", value)
   elseif t == 'table' then
     local s = '{\n'
 
@@ -21,7 +23,7 @@ local function write(value, indent)
 end
 
 function stream.read(file)
-  local buffer = love.filesystem.read(file)
+  local buffer = lf.read(file)
 
   if buffer then
     local chunk = load(buffer, 'chunk', 't')
@@ -33,7 +35,7 @@ function stream.read(file)
 end
 
 function stream.write(file, value)
-  love.filesystem.write(file, 'return ' .. write(value, '') .. '\n')
+  lf.write(file, 'return ' .. write(value, '') .. '\n')
 end
 
 return stream

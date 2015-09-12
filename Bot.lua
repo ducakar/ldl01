@@ -1,17 +1,18 @@
 local atlas = require 'atlas'
 local orbis = require 'orbis'
+local la    = love.audio
 
 local Bot = orbis.Object:new {
-  class = 'Bot',
-  field = 0,
-  dir   = 0,
-  speed = 4.0,
-  path  = nil,
-  task  = false,
-  anim  = 0.0,
-  fx    = {
+  class    = 'Bot',
+  field    = 0,
+  dir      = 0,
+  speed    = 4.0,
+  path     = nil,
+  task     = false,
+  anim     = 0.0,
+  fx       = {
     frames = atlas.robot,
-    step   = love.audio.newSource(atlas.step)
+    step   = la.newSource(atlas.step)
   }
 }
 Bot.__index = Bot

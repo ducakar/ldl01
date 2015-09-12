@@ -12,19 +12,25 @@ local net = {
 
 function net.write()
   return {
-    servers  = net.servers,
-    time     = net.time,
-    day      = net.day,
-    timeWarp = net.timeWarp
+    servers   = net.servers,
+    time      = net.time,
+    day       = net.day,
+    timeWarp  = net.timeWarp,
+    cores     = net.cores,
+    freeCores = net.freeCores,
+    money     = net.money
   }
 end
 
 function net.init(o)
   if o then
-    net.servers  = o.servers
-    net.time     = o.time
-    net.day      = o.day
-    net.timeWarp = o.timeWarp
+    net.servers   = o.servers
+    net.time      = o.time
+    net.day       = o.day
+    net.timeWarp  = o.timeWarp
+    net.cores     = o.cores
+    net.freeCores = o.freeCores
+    net.money     = o.money
   end
 end
 

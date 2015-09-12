@@ -1,3 +1,6 @@
+local lg = love.graphics
+local ls = love.sound
+
 local atlas = {
   WIDTH  = 416,
   HEIGHT = 240,
@@ -55,8 +58,7 @@ local imageWidth  = 0
 local imageHeight = 0
 
 local function quad(x, y, width, height)
-  return love.graphics.newQuad(x * atlas.DIM, y * atlas.DIM, width * atlas.DIM, height * atlas.DIM,
-                               imageWidth, imageHeight)
+  return lg.newQuad(x * atlas.DIM, y * atlas.DIM, width * atlas.DIM, height * atlas.DIM, imageWidth, imageHeight)
 end
 
 local function sprite(x, y, width, height, offsetX, offsetY)
@@ -68,11 +70,11 @@ local function sprite(x, y, width, height, offsetX, offsetY)
 end
 
 local function sound(name)
-  return love.sound.newSoundData(string.format('sfx/%s.wav', name))
+  return ls.newSoundData(string.format('sfx/%s.wav', name))
 end
 
 function atlas.init()
-  atlas.image = love.graphics.newImage('gfx/atlas.png')
+  atlas.image = lg.newImage('gfx/atlas.png')
   imageWidth, imageHeight = atlas.image:getDimensions()
 
   for _, field in ipairs(atlas.FIELDS) do
@@ -101,6 +103,7 @@ function atlas.init()
   atlas.switch   = sprite(3, 8, 2, 2, 1, 1)
   atlas.warning  = sprite(4, 10, 1, 2, 0, 1)
   atlas.timeWarp = { quad(15, 0, 1, 1), quad(15, 1, 1, 1), quad(15, 2, 1, 1), quad(15, 3, 1, 1), quad(15, 4, 1, 1) }
+  atlas.dest     = quad(15, 5, 1, 1)
   atlas.cross    = quad(15, 15, 1, 1)
 
   atlas.step     = sound('footstep1')

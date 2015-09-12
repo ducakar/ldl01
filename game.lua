@@ -5,8 +5,7 @@ local Bot    = require 'Bot'
 local Device = require 'Device'
 local ui     = require 'ui'
 local stream = require 'stream'
-
-local actor = nil
+local le     = love.event
 
 local game = {}
 
@@ -37,7 +36,7 @@ function game.mousePressed(x, y, button)
     local fieldX, fieldY = math.floor(x / atlas.DIM) + 1, math.floor(y / atlas.DIM) + 1
 
     if 1 <= fieldX and fieldX <= orbis.width and 1 <= fieldY and fieldY <= orbis.height then
-      actor:setPathTo((fieldY - 1) * orbis.width + fieldX)
+      orbis.actor:setPathTo((fieldY - 1) * orbis.width + fieldX)
     end
   end
 end
@@ -61,18 +60,12 @@ function game.init()
     net.init()
     orbis.init({ map = 'maps/warehouse' })
 
-    Bot:new({ field = orbis.field(4, 4) }):place()
+    orbis.actor = Bot:new({ field = orbis.field(4, 4) })
+    orbis.actor:place()
 
-    Device.Warning:new({ field = orbis.field(23, 13) }):place()
+    Device.Warning:new({ field = orbis.field(24, 13) }):place()
     Device.Server:new({ field = orbis.field(12, 6) }):place()
     Device.Switch:new({ field = orbis.field(20, 10) }):place()
-  end
-
-  for _, obj in pairs(orbis.objects) do
-    if obj.class == 'Bot' then
-      actor = obj
-      break
-    end
   end
 end
 
@@ -97,7 +90,7 @@ function game.update(dt)
   ui.update(dt)
 
   if ui.selection == 2 then
-    love.event.quit()
+    le.quit()
   end
 end
 

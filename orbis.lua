@@ -1,5 +1,6 @@
 local atlas = require 'atlas'
 local net   = require 'net'
+local lg    = love.graphics
 
 local WIDTH          = 26
 local HEIGHT         = 15
@@ -7,9 +8,9 @@ local HEIGHT         = 15
 local pathFields     = {}
 local internalColour = { 255, 255, 255 }
 local externalColour = { 160, 160, 160 }
-local internalsBatch = love.graphics.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'static')
-local externalsBatch = love.graphics.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'static')
-local objectsBatch   = love.graphics.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'stream')
+local internalsBatch = lg.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'static')
+local externalsBatch = lg.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'static')
+local objectsBatch   = lg.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'stream')
 
 local orbis = {
   Object    = {
@@ -24,7 +25,8 @@ local orbis = {
   spaces    = {},
   objects   = {},
   devices   = {},
-  triggers  = {}
+  triggers  = {},
+  actor     = nil
 }
 orbis.Object.__index = orbis.Object
 
@@ -98,7 +100,8 @@ end
 function orbis.write()
   return {
     map     = orbis.map,
-    objects = orbis.objects
+    objects = orbis.objects,
+    actor   = orbis.actor and orbis.actor.field
   }
 end
 
@@ -117,7 +120,13 @@ function orbis.init(o)
 
   if o.objects then
     for _, obj in pairs(o.objects) do
-      orbis.Object[obj.class]:new(obj):place()
+      local newObj = orbis.Object[obj.class]:new(obj)
+
+      newObj:place()
+
+      if newObj.field == o.actor then
+        orbis.actor = newObj
+      end
     end
   end
 
@@ -149,56 +158,60 @@ end
 
 function orbis.draw()
   local colourFactor = 0.5 + math.min(0.5, math.max(-0.5, 0.7 * math.cos(net.time / 43200.0 * math.pi)))
-  local fieldBase    = 0
 
   externalColour[1] = 255 + colourFactor * (100 - 255)
   externalColour[2] = 255 + colourFactor * (100 - 255)
   externalColour[3] = 255 + colourFactor * (140 - 255)
 
-  love.graphics.setColor(internalColour[1], internalColour[2], internalColour[3])
-  love.graphics.draw(internalsBatch)
-  love.graphics.setColor(externalColour[1], externalColour[2], externalColour[3])
-  love.graphics.draw(externalsBatch)
+  lg.setColor(internalColour[1], internalColour[2], internalColour[3])
+  lg.draw(internalsBatch)
+  lg.setColor(externalColour[1], externalColour[2], externalColour[3])
+  lg.draw(externalsBatch)
 
-  for y = 1, orbis.height + 1 do
-    for x = 1, orbis.width + 1 do
-      -- if x <= orbis.width then
-      --   if not orbis.spaces[field] then
-      --     batch:add(atlas.cross, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM)
-      --   end
-      -- end
-      if x <= orbis.width then
-        local field  = fieldBase - orbis.width + x
-        local object = orbis.objects[field]
+  if orbis.actor and orbis.actor.path then
+    local x, y = orbis.pos(orbis.actor.path[1])
+
+    objectsBatch:setColor(255, 255, 255)
+    objectsBatch:add(atlas.dest, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM)
+  end
+
+  local objField  = 1
+  local wallField = 1
+
+  for y = 1, orbis.height do
+    for x = 0, orbis.width do
+      if x ~= orbis.width then
+        local object = orbis.objects[objField]
 
         if object then
-          local colour = orbis.externals[field] and externalColour or internalColour
+          local colour = orbis.externals[objField] and externalColour or internalColour
 
           objectsBatch:setColor(colour[1], colour[2], colour[3])
           object:draw(objectsBatch)
         end
+
+        objField = objField + 1
       end
-      if 1 < x then
-        local field = fieldBase -orbis.width + x - 1
-        local wall  = orbis.tiles[field]
+      if x ~= 0 then
+        local wall = orbis.tiles[wallField]
 
         if wall then
           local quad = atlas.FIELDS[wall].quads[2]
 
           if quad then
-            local colour = orbis.externals[field] and externalColour or internalColour
+            local colour = orbis.externals[wallField] and externalColour or internalColour
 
             objectsBatch:setColor(colour[1], colour[2], colour[3])
-            objectsBatch:add(quad, (x - 2) * atlas.DIM, (y - 2) * atlas.DIM, 0, 1, 1, 0, atlas.DIM)
+            objectsBatch:add(quad, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM, 0, 1, 1, 0, atlas.DIM)
           end
         end
+
+        wallField = wallField + 1
       end
     end
-
-    fieldBase = fieldBase + orbis.width
   end
 
-  love.graphics.draw(objectsBatch)
+  lg.draw(objectsBatch)
   objectsBatch:clear()
 end
 

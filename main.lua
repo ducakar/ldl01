@@ -1,15 +1,16 @@
 local atlas = require 'atlas'
+local le    = love.event
 local lg    = love.graphics
+local lw    = love.window
 
 local stage
 local canvas = {}
-local batch
 
 function love.keypressed(key)
   if key == 'f11' then
-    love.window.setFullscreen(not love.window.getFullscreen(), 'desktop')
+    lw.setFullscreen(not lw.getFullscreen(), 'desktop')
   elseif key == 'escape' then
-    love.event.quit()
+    le.quit()
   elseif stage then
     stage.keyPressed(key)
   end
@@ -53,18 +54,17 @@ function love.resize(windowWidth, windowHeight)
 end
 
 function love.load()
-  local windowWidth, windowHeight = love.window.getDimensions()
+  local windowWidth, windowHeight = lw.getDimensions()
 
   love.resize(windowWidth, windowHeight)
-  love.window.setMode(windowWidth, windowHeight, { resizable = true })
-  love.window.setFullscreen(true, 'desktop')
+  lw.setMode(windowWidth, windowHeight, { resizable = true })
+  lw.setFullscreen(true, 'desktop')
 
   lg.setDefaultFilter('nearest', 'nearest')
 
   canvas.handle = lg.newCanvas(atlas.WIDTH, atlas.HEIGHT)
 
-  atlas.init(batch)
-  batch = lg.newSpriteBatch(atlas.image)
+  atlas.init()
 
   stage = require 'game'
   stage.init()
@@ -82,8 +82,6 @@ function love.draw()
 
   lg.setCanvas()
   lg.draw(canvas.handle, canvas.offsetX, canvas.offsetY, 0, canvas.scale, canvas.scale)
-
-  batch:clear()
 end
 
 function love.update(dt)

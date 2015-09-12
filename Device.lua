@@ -25,7 +25,7 @@ function Device:canPlace(centralField)
         if centreX + x < 1 or orbis.width < centreX + x or centreY + y < 1 or orbis.height < centreY + y then
           return false
         end
-        if not orbis.spaces[field] then
+        if not orbis.spaces[field] or orbis.objects[field] or orbis.devices[field] then
           return false
         end
       end
@@ -83,7 +83,7 @@ Device.Server = Device:new {
   class = 'Server',
   fieldMask = {
     0, 0, 0, 0, 0,
-    3, 3, 2, 3, 3,
+    0, 0, 0, 0, 0,
     3, 1, 1, 1, 3,
     3, 3, 3, 3, 3,
     0, 0, 0, 0, 0
@@ -98,7 +98,7 @@ Device.Switch = Device:new {
   class = 'Switch',
   fieldMask = {
     0, 0, 0, 0, 0,
-    3, 3, 2, 3, 0,
+    0, 0, 0, 0, 0,
     3, 1, 1, 3, 0,
     3, 3, 3, 3, 0,
     0, 0, 0, 0, 0
