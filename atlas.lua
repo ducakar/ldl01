@@ -2,53 +2,78 @@ local lg = love.graphics
 local ls = love.sound
 
 local atlas = {
-  WIDTH  = 416,
-  HEIGHT = 240,
+  WIDTH  = 512,
+  HEIGHT = 288,
   DIM    = 16,
   FIELDS = {
-    {
-      layers = { 0, nil },
-      space = true,
+    [01] = {
+      layers   = { 0, nil },
+      space    = true,
       external = true
     },
-    {
-      layers = { 0, 3 },
-      space = false,
+    [02] = {
+      layers   = { 0, 3 },
+      space    = false,
       external = true
     },
-    {
-      layers = { 0, 4 },
-      space = false,
+    [03] = {
+      layers   = { 0, 4 },
+      space    = false,
       external = true
     },
-    {
-      layers = { 0, 5 },
-      space = false,
+    [04] = {
+      layers   = { 0, 5 },
+      space    = false,
       external = true
     },
-    {
-      layers = { 0, 6 },
-      space = false,
+    [05] = {
+      layers   = { 0, 6 },
+      space    = false,
       external = true
     },
-    {
-      layers = { 0, 7 },
-      space = false,
+    [06] = {
+      layers   = { 0, 7 },
+      space    = false,
       external = true
     },
-    {
-      layers = { 1, nil },
-      space = true,
+    [07] = {
+      layers   = { 3, nil },
+      space    = false,
+      external = true
+    },
+    [08] = {
+      layers   = { 4, nil },
+      space    = false,
+      external = true
+    },
+    [70] = {
+      layers   = { 5, nil },
+      space    = true,
       external = false
     },
-    {
-      layers = { nil, 0 },
-      space = false,
+    [71] = {
+      layers   = { nil, 0 },
+      space    = false,
       external = false
     },
-    {
-      layers = { nil, 1 },
-      space = false,
+    [80] = {
+      layers   = { 6, nil },
+      space    = true,
+      external = false
+    },
+    [81] = {
+      layers   = { nil, 1 },
+      space    = false,
+      external = false
+    },
+    [90] = {
+      layers   = { 7, nil },
+      space    = true,
+      external = false
+    },
+    [91] = {
+      layers   = { nil, 2 },
+      space    = false,
       external = false
     }
   }
@@ -77,7 +102,7 @@ function atlas.init()
   atlas.image = lg.newImage('gfx/atlas.png')
   imageWidth, imageHeight = atlas.image:getDimensions()
 
-  for _, field in ipairs(atlas.FIELDS) do
+  for _, field in pairs(atlas.FIELDS) do
     local floor = field.layers[1]
     local wall  = field.layers[2]
 
@@ -92,19 +117,23 @@ function atlas.init()
   end
 
   atlas.robot = {
-    sprite(0, 0, 1, 2, 0, 1), sprite(0, 2, 1, 2, 0, 1), sprite(0, 4, 1, 2, 0, 1),
-    sprite(1, 0, 1, 2, 0, 1), sprite(1, 2, 1, 2, 0, 1), sprite(1, 4, 1, 2, 0, 1),
-    sprite(2, 0, 1, 2, 0, 1), sprite(2, 2, 1, 2, 0, 1), sprite(2, 4, 1, 2, 0, 1),
-    sprite(3, 0, 1, 2, 0, 1), sprite(3, 2, 1, 2, 0, 1), sprite(3, 4, 1, 2, 0, 1),
-    sprite(0, 6, 1, 2, 0, 1), sprite(1, 6, 1, 2, 0, 1), sprite(2, 6, 1, 2, 0, 1), sprite(3, 6, 1, 2, 0, 1)
+    quad(0, 0, 1, 2), quad(0, 2, 1, 2), quad(0, 4, 1, 2),
+    quad(1, 0, 1, 2), quad(1, 2, 1, 2), quad(1, 4, 1, 2),
+    quad(2, 0, 1, 2), quad(2, 2, 1, 2), quad(2, 4, 1, 2),
+    quad(3, 0, 1, 2), quad(3, 2, 1, 2), quad(3, 4, 1, 2),
+    quad(0, 6, 1, 2), quad(1, 6, 1, 2), quad(2, 6, 1, 2), quad(3, 6, 1, 2)
   }
 
+  atlas.terminal = sprite(0, 10, 3, 3, 1, 2)
   atlas.server   = sprite(0, 8, 3, 2, 1, 1)
   atlas.switch   = sprite(3, 8, 2, 2, 1, 1)
   atlas.warning  = sprite(4, 10, 1, 2, 0, 1)
   atlas.timeWarp = { quad(15, 0, 1, 1), quad(15, 1, 1, 1), quad(15, 2, 1, 1), quad(15, 3, 1, 1), quad(15, 4, 1, 1) }
-  atlas.dest     = quad(15, 5, 1, 1)
-  atlas.cross    = quad(15, 15, 1, 1)
+
+  atlas.destroy  = quad(15, 12, 1, 1)
+  atlas.build    = quad(15, 13, 1, 1)
+  atlas.device   = quad(15, 14, 1, 1)
+  atlas.dest     = quad(15, 15, 1, 1)
 
   atlas.step     = sound('footstep1')
 end

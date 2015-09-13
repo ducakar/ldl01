@@ -2,7 +2,6 @@ local atlas = require 'atlas'
 local net   = require 'net'
 local lg    = love.graphics
 local lm    = love.mouse
-local lt    = love.timer
 
 local ASCII      = [[ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~€]]
 local MARGINX    = 78
@@ -109,7 +108,7 @@ function ui.draw()
   lg.printf(statsText, 2, 2, 200, 'left')
   lg.printf(timeText, atlas.WIDTH - 202, 2, 200, 'right')
   lg.draw(atlas.image, atlas.timeWarp[ui.active() and 1 or net.timeWarp], atlas.WIDTH - atlas.DIM, textHeight)
-  lg.printf(string.format('%d FPS', lt.getFPS()), atlas.WIDTH - 102, 2 + textHeight + atlas.DIM, 100, 'right')
+  -- lg.printf(string.format('%d FPS', love.timer.getFPS()), atlas.WIDTH - 102, 2 + textHeight + atlas.DIM, 100, 'right')
 
   if ui.text then
     drawBox()

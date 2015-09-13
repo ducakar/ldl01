@@ -2,7 +2,7 @@ local atlas = require 'atlas'
 local orbis = require 'orbis'
 local la    = love.audio
 
-local Bot = orbis.Object:new {
+local Bot = orbis.Object:new{
   class    = 'Bot',
   field    = 0,
   dir      = 0,
@@ -82,9 +82,7 @@ function Bot:draw(batch)
   end
 
   local ox, oy = self:pos()
-  local sprite = self.fx.frames[frame]
-
-  batch:add(sprite.quad, (ox - 1) * atlas.DIM, (oy - 1) * atlas.DIM, 0, 1, 1, sprite.offsetX, sprite.offsetY)
+  batch:add(self.fx.frames[frame], (ox - 1) * atlas.DIM, (oy - 1) * atlas.DIM, 0, 1, 1, 0, atlas.DIM)
 end
 
 function Bot:update(dt)

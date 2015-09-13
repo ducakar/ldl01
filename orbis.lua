@@ -2,8 +2,8 @@ local atlas = require 'atlas'
 local net   = require 'net'
 local lg    = love.graphics
 
-local WIDTH          = 26
-local HEIGHT         = 15
+local WIDTH          = 32
+local HEIGHT         = 18
 
 local pathFields     = {}
 local internalColour = { 255, 255, 255 }

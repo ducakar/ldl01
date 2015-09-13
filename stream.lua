@@ -14,6 +14,7 @@ local function write(value, indent)
 
     for i, v in pairs(value) do
       local is, vs = write(i, ''), write(v, indent .. '  ')
+
       if is and vs then
         s = string.format('%s%s  [%s] = %s', s, indent, is, vs) .. (next(value, i) and ',\n' or '\n')
       end

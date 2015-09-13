@@ -42,9 +42,7 @@ function game.mousePressed(x, y, button)
 end
 
 function game.mouseMoved(x, y)
-  if ui.active() then
-    ui.mouseMoved(x, y)
-  end
+  ui.mouseMoved(x, y)
 end
 
 function game.init()
@@ -60,12 +58,12 @@ function game.init()
     net.init()
     orbis.init({ map = 'maps/warehouse' })
 
-    orbis.actor = Bot:new({ field = orbis.field(4, 4) })
+    orbis.actor = Bot:new{ field = orbis.field(4, 4) }
     orbis.actor:place()
 
-    Device.Warning:new({ field = orbis.field(24, 13) }):place()
-    Device.Server:new({ field = orbis.field(12, 6) }):place()
-    Device.Switch:new({ field = orbis.field(20, 10) }):place()
+    Device.Warning:new{ field = orbis.field(24, 13) }:place()
+    Device.Server:new{ field = orbis.field(12, 6) }:place()
+    Device.Switch:new{ field = orbis.field(20, 10) }:place()
   end
 end
 

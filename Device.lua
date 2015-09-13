@@ -1,9 +1,10 @@
 local atlas = require 'atlas'
 local orbis = require 'orbis'
 
-local Device = orbis.Object:new {
+local Device = orbis.Object:new{
   field     = 0,
   fieldMask = nil,
+  internal  = true,
   progress  = 1.0,
   fx        = nil
 }
@@ -25,7 +26,7 @@ function Device:canPlace(centralField)
         if centreX + x < 1 or orbis.width < centreX + x or centreY + y < 1 or orbis.height < centreY + y then
           return false
         end
-        if not orbis.spaces[field] or orbis.objects[field] or orbis.devices[field] then
+        if not orbis.spaces[field] or orbis.devices[field] or (self.internal and orbis.externals[field]) then
           return false
         end
       end
@@ -79,7 +80,22 @@ function Device:draw(batch)
   batch:add(sprite.quad, (ox - 1) * atlas.DIM, (oy - 1) * atlas.DIM, 0, 1, 1, sprite.offsetX, sprite.offsetY)
 end
 
-Device.Server = Device:new {
+Device.Terminal = Device:new{
+  class = 'Terminal',
+  fieldMask = {
+    0, 3, 3, 3, 0,
+    0, 1, 2, 1, 0,
+    0, 1, 1, 1, 0,
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0
+  },
+  fx = {
+    sprite = atlas.terminal
+  }
+}
+Device.Terminal.__index = Device.Terminal
+
+Device.Server = Device:new{
   class = 'Server',
   fieldMask = {
     0, 0, 0, 0, 0,
@@ -94,7 +110,7 @@ Device.Server = Device:new {
 }
 Device.Server.__index = Device.Server
 
-Device.Switch = Device:new {
+Device.Switch = Device:new{
   class = 'Switch',
   fieldMask = {
     0, 0, 0, 0, 0,
@@ -109,22 +125,25 @@ Device.Switch = Device:new {
 }
 Device.Switch.__index = Device.Switch
 
-Device.Warning = Device:new {
+Device.Warning = Device:new{
   class = 'Warning',
   fieldMask = {
     0, 0, 0, 0, 0,
     0, 3, 3, 3, 0,
     0, 3, 1, 3, 0,
-    0, 3, 3, 3, 0
+    0, 3, 3, 3, 0,
+    0, 0, 0, 0, 0
   },
+  internal = false,
   fx = {
     sprite = atlas.warning
   }
 }
 Device.Warning.__index = Device.Warning
 
-orbis.Object.Server  = Device.Server
-orbis.Object.Switch  = Device.Switch
-orbis.Object.Warning = Device.Warning
+orbis.Object.Terminal = Device.Terminal
+orbis.Object.Server   = Device.Server
+orbis.Object.Switch   = Device.Switch
+orbis.Object.Warning  = Device.Warning
 
 return Device
