@@ -5,7 +5,7 @@ local Device = orbis.Object:new{
   field     = 0,
   fieldMask = nil,
   internal  = true,
-  progress  = 1.0,
+  progress  = nil,
   fx        = nil
 }
 Device.__index = Device
@@ -100,8 +100,8 @@ Device.Server = Device:new{
   fieldMask = {
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0,
-    3, 1, 1, 1, 3,
-    3, 3, 3, 3, 3,
+    0, 1, 1, 1, 0,
+    0, 3, 3, 3, 0,
     0, 0, 0, 0, 0
   },
   fx = {
@@ -115,8 +115,8 @@ Device.Switch = Device:new{
   fieldMask = {
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0,
-    3, 1, 1, 3, 0,
-    3, 3, 3, 3, 0,
+    0, 1, 1, 0, 0,
+    0, 3, 3, 0, 0,
     0, 0, 0, 0, 0
   },
   fx = {
@@ -129,9 +129,9 @@ Device.Warning = Device:new{
   class = 'Warning',
   fieldMask = {
     0, 0, 0, 0, 0,
-    0, 3, 3, 3, 0,
-    0, 3, 1, 3, 0,
-    0, 3, 3, 3, 0,
+    0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0,
+    0, 0, 0, 0, 0,
     0, 0, 0, 0, 0
   },
   internal = false,

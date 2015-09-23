@@ -1,7 +1,8 @@
-local atlas = require 'atlas'
-local net   = require 'net'
-local lg    = love.graphics
-local lm    = love.mouse
+local atlas  = require 'atlas'
+local net    = require 'net'
+local orbis  = require 'orbis'
+local lg     = love.graphics
+local lm     = love.mouse
 
 local ASCII      = [[ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~€]]
 local MARGINX    = 78
@@ -24,6 +25,8 @@ local textWidth  = nil
 local textHeight = nil
 local choiceX    = textX + 8
 local choiceY    = nil
+
+local buildCue   = nil
 
 local ui = {}
 
@@ -57,7 +60,7 @@ local function drawBox()
 end
 
 function ui.active()
-  return ui.text
+  return ui.text or buildCue
 end
 
 function ui.show(text, choices)
@@ -132,6 +135,30 @@ function ui.draw()
   end
 
   lg.setColor(255, 255, 255)
+
+  if buildCue then
+    local fieldX, fieldY = math.floor(mouseX / atlas.DIM) + 1, math.floor(mouseY / atlas.DIM) + 1
+    local sprite = buildCue.fx.sprite
+
+    if buildCue:canPlace(orbis.field(fieldX, fieldY)) then
+      lg.setColor(128, 255, 128, 128)
+    else
+      lg.setColor(255, 0, 0, 128)
+    end
+
+    lg.draw(atlas.image, sprite.quad, (fieldX - 1) * atlas.DIM, (fieldY - 1) * atlas.DIM, 0, 1, 1, sprite.offsetX, sprite.offsetY)
+    lg.setColor(255, 255, 255)
+  end
+
+  for _, object in pairs(orbis.objects) do
+    if object.progress then
+      local ox, oy = object:pos()
+
+      lg.setColor(0, 160, 255, 160)
+      lg.arc('fill', (ox - 0.5) * atlas.DIM, (oy - 0.5) * atlas.DIM, 0.5 * atlas.DIM,
+             2.5 * math.pi, (0.25 + object.progress) * 2.0 * math.pi)
+    end
+  end
 end
 
 function ui.update()

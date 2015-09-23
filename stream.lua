@@ -8,7 +8,7 @@ local function write(value, indent)
   if t == 'nil' or t == 'boolean' or t == 'number' then
     return tostring(value)
   elseif t == 'string' then
-    return string.format("'%s'", value)
+    return string.format('"%s"', value)
   elseif t == 'table' then
     local s = '{\n'
 
@@ -16,7 +16,7 @@ local function write(value, indent)
       local is, vs = write(i, ''), write(v, indent .. '  ')
 
       if is and vs then
-        s = string.format('%s%s  [%s] = %s', s, indent, is, vs) .. (next(value, i) and ',\n' or '\n')
+        s = string.format('%s%s  [%s] = %s,\n', s, indent, is, vs)
       end
     end
     return string.format('%s%s}', s, indent)

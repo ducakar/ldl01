@@ -97,14 +97,6 @@ function orbis.findPath(srcField, destField)
   end
 end
 
-function orbis.write()
-  return {
-    map     = orbis.map,
-    objects = orbis.objects,
-    actor   = orbis.actor and orbis.actor.field
-  }
-end
-
 function orbis.init(o)
   local tiles = require(o.map)
 
@@ -154,6 +146,14 @@ function orbis.init(o)
 
     fieldBase = fieldBase + orbis.width
   end
+end
+
+function orbis.save()
+  return {
+    map     = orbis.map,
+    objects = orbis.objects,
+    actor   = orbis.actor and orbis.actor.field
+  }
 end
 
 function orbis.draw()

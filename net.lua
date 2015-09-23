@@ -10,18 +10,6 @@ local net = {
   money     = 1234567890
 }
 
-function net.write()
-  return {
-    servers   = net.servers,
-    time      = net.time,
-    day       = net.day,
-    timeWarp  = net.timeWarp,
-    cores     = net.cores,
-    freeCores = net.freeCores,
-    money     = net.money
-  }
-end
-
 function net.init(o)
   if o then
     net.servers   = o.servers
@@ -32,6 +20,18 @@ function net.init(o)
     net.freeCores = o.freeCores
     net.money     = o.money
   end
+end
+
+function net.save()
+  return {
+    servers   = net.servers,
+    time      = net.time,
+    day       = net.day,
+    timeWarp  = net.timeWarp,
+    cores     = net.cores,
+    freeCores = net.freeCores,
+    money     = net.money
+  }
 end
 
 function net.update(dt)

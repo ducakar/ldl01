@@ -35,9 +35,7 @@ function game.mousePressed(x, y, button)
   else
     local fieldX, fieldY = math.floor(x / atlas.DIM) + 1, math.floor(y / atlas.DIM) + 1
 
-    if 1 <= fieldX and fieldX <= orbis.width and 1 <= fieldY and fieldY <= orbis.height then
-      orbis.actor:setPathTo((fieldY - 1) * orbis.width + fieldX)
-    end
+    orbis.actor:setPathTo(orbis.field(fieldX, fieldY))
   end
 end
 
@@ -69,8 +67,8 @@ end
 
 function game.quit()
   stream.write('autosave.lua', {
-    net   = net.write(),
-    orbis = orbis.write()
+    net   = net.save(),
+    orbis = orbis.save()
   })
 end
 

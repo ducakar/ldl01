@@ -124,6 +124,7 @@ function atlas.init()
     quad(0, 6, 1, 2), quad(1, 6, 1, 2), quad(2, 6, 1, 2), quad(3, 6, 1, 2)
   }
 
+  atlas.box      = quad(4, 11, 1, 1)
   atlas.terminal = sprite(0, 10, 3, 3, 1, 2)
   atlas.server   = sprite(0, 8, 3, 2, 1, 1)
   atlas.switch   = sprite(3, 8, 2, 2, 1, 1)

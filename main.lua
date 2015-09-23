@@ -21,7 +21,9 @@ function love.mousepressed(x, y, button)
     local localX = (x - canvas.offsetX) / canvas.width * atlas.WIDTH
     local localY = (y - canvas.offsetY) / canvas.height * atlas.HEIGHT
 
-    stage.mousePressed(localX, localY, button)
+    if 0 <= localX and localX < atlas.WIDTH and 0 <= localY and localY < atlas.HEIGHT then
+      stage.mousePressed(localX, localY, button)
+    end
   end
 end
 
@@ -30,7 +32,9 @@ function love.mousemoved(x, y)
     local localX = (x - canvas.offsetX) / canvas.width * atlas.WIDTH
     local localY = (y - canvas.offsetY) / canvas.height * atlas.HEIGHT
 
-    stage.mouseMoved(localX, localY)
+    if 0 <= localX and localX < atlas.WIDTH and 0 <= localY and localY < atlas.HEIGHT then
+      stage.mouseMoved(localX, localY)
+    end
   end
 end
 
@@ -56,12 +60,11 @@ end
 function love.load()
   local windowWidth, windowHeight = lw.getDimensions()
 
-  love.resize(windowWidth, windowHeight)
   lw.setMode(windowWidth, windowHeight, { resizable = true })
   lw.setFullscreen(true, 'desktop')
-
   lg.setDefaultFilter('nearest', 'nearest')
 
+  love.resize(windowWidth, windowHeight)
   canvas.handle = lg.newCanvas(atlas.WIDTH, atlas.HEIGHT)
 
   atlas.init()
@@ -76,11 +79,9 @@ end
 
 function love.draw()
   lg.setCanvas(canvas.handle)
-  lg.clear()
-
   stage.draw()
-
   lg.setCanvas()
+  lg.setColor(255, 255, 255)
   lg.draw(canvas.handle, canvas.offsetX, canvas.offsetY, 0, canvas.scale, canvas.scale)
 end
 
