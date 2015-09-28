@@ -185,8 +185,9 @@ function orbis.draw()
 
         if object then
           local colour = orbis.externals[objField] and externalColour or internalColour
+          local alpha  = object.building and 128 or 255
 
-          objectsBatch:setColor(colour[1], colour[2], colour[3])
+          objectsBatch:setColor(colour[1], colour[2], colour[3], alpha)
           object:draw(objectsBatch)
         end
 

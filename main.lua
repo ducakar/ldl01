@@ -6,6 +6,10 @@ local lw    = love.window
 local stage
 local canvas = {}
 
+function love.threaderror(_, message)
+  error(message)
+end
+
 function love.keypressed(key)
   if key == 'f11' then
     lw.setFullscreen(not lw.getFullscreen(), 'desktop')
@@ -14,6 +18,10 @@ function love.keypressed(key)
   elseif stage then
     stage.keyPressed(key)
   end
+end
+
+function love.textinput(char)
+  stage.textInput(char)
 end
 
 function love.mousepressed(x, y, button)
@@ -42,6 +50,8 @@ function love.resize(windowWidth, windowHeight)
   local canvasRatio = atlas.WIDTH / atlas.HEIGHT
   local windowRatio = windowWidth / windowHeight
 
+  canvas.handle = canvas.handle or lg.newCanvas(atlas.WIDTH, atlas.HEIGHT)
+
   if canvasRatio < windowRatio then
     canvas.scale   = windowHeight / atlas.HEIGHT
     canvas.width   = windowHeight * canvasRatio
@@ -58,17 +68,10 @@ function love.resize(windowWidth, windowHeight)
 end
 
 function love.load()
-  local windowWidth, windowHeight = lw.getDimensions()
-
-  lw.setMode(windowWidth, windowHeight, { resizable = true })
-  lw.setFullscreen(true, 'desktop')
   lg.setDefaultFilter('nearest', 'nearest')
-
-  love.resize(windowWidth, windowHeight)
-  canvas.handle = lg.newCanvas(atlas.WIDTH, atlas.HEIGHT)
+  love.resize(lw.getDimensions())
 
   atlas.init()
-
   stage = require 'game'
   stage.init()
 end

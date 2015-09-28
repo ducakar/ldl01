@@ -5,7 +5,8 @@ local Device = orbis.Object:new{
   field     = 0,
   fieldMask = nil,
   internal  = true,
-  progress  = nil,
+  buildTime = nil,
+  building  = nil,
   fx        = nil
 }
 Device.__index = Device
@@ -14,12 +15,16 @@ function Device:pos()
   return orbis.pos(self.field)
 end
 
-function Device:canPlace(centralField)
-  local centreX, centreY = orbis.pos(centralField)
+function Device:active()
+  return self.building
+end
+
+function Device:canPlace()
+  local centreX, centreY = orbis.pos(self.field)
 
   for y = -2, 2 do
     for x = -2, 2 do
-      local field = centralField + y * orbis.width + x
+      local field = self.field + y * orbis.width + x
       local value = self.fieldMask[(y + 2) * 5 + x + 3]
 
       if value ~= 0 then
@@ -74,13 +79,13 @@ function Device:remove()
 end
 
 function Device:draw(batch)
-  local ox, oy = self:pos()
+  local x, y   = self:pos()
   local sprite = self.fx.sprite
 
-  batch:add(sprite.quad, (ox - 1) * atlas.DIM, (oy - 1) * atlas.DIM, 0, 1, 1, sprite.offsetX, sprite.offsetY)
+  batch:add(sprite.quad, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM, 0, 1, 1, sprite.offsetX, sprite.offsetY)
 end
 
-Device.Terminal = Device:new{
+local Terminal = Device:new{
   class = 'Terminal',
   fieldMask = {
     0, 3, 3, 3, 0,
@@ -89,61 +94,67 @@ Device.Terminal = Device:new{
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0
   },
+  buildTime = 12 * 3600,
   fx = {
     sprite = atlas.terminal
   }
 }
-Device.Terminal.__index = Device.Terminal
+Terminal.__index = Terminal
 
-Device.Server = Device:new{
+function Terminal.active()
+  return true
+end
+
+local Server = Device:new{
   class = 'Server',
   fieldMask = {
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0,
     0, 1, 1, 1, 0,
-    0, 3, 3, 3, 0,
+    0, 3, 2, 3, 0,
     0, 0, 0, 0, 0
   },
+  buildTime = 8 * 3600,
   fx = {
     sprite = atlas.server
   }
 }
-Device.Server.__index = Device.Server
+Server.__index = Server
 
-Device.Switch = Device:new{
+local Switch = Device:new{
   class = 'Switch',
   fieldMask = {
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0,
     0, 1, 1, 0, 0,
-    0, 3, 3, 0, 0,
+    0, 3, 2, 0, 0,
     0, 0, 0, 0, 0
   },
+  buildTime = 16 * 3600,
   fx = {
     sprite = atlas.switch
   }
 }
-Device.Switch.__index = Device.Switch
+Switch.__index = Switch
 
-Device.Warning = Device:new{
+local Warning = Device:new{
   class = 'Warning',
   fieldMask = {
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0,
     0, 0, 1, 0, 0,
-    0, 0, 0, 0, 0,
+    0, 0, 2, 0, 0,
     0, 0, 0, 0, 0
   },
+  buildTime = 2 * 3600,
   internal = false,
   fx = {
     sprite = atlas.warning
   }
 }
-Device.Warning.__index = Device.Warning
+Warning.__index = Warning
 
-orbis.Object.Terminal = Device.Terminal
-orbis.Object.Server   = Device.Server
-orbis.Object.Switch   = Device.Switch
-orbis.Object.Warning  = Device.Warning
-
-return Device
+orbis.Object.Terminal = Terminal
+orbis.Object.Server   = Server
+orbis.Object.Switch   = Switch
+orbis.Object.Warning  = Warning

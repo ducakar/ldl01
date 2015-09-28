@@ -1,4 +1,5 @@
 local atlas = require 'atlas'
+local net   = require 'net'
 local orbis = require 'orbis'
 local la    = love.audio
 
@@ -12,7 +13,7 @@ local Bot = orbis.Object:new{
   anim     = 0.0,
   fx       = {
     frames = atlas.robot,
-    step   = la.newSource(atlas.step)
+    step   = la.newSource(atlas.footstep)
   }
 }
 Bot.__index = Bot
@@ -81,8 +82,8 @@ function Bot:draw(batch)
     frame = 13 + math.floor(self.anim * 4)
   end
 
-  local ox, oy = self:pos()
-  batch:add(self.fx.frames[frame], (ox - 1) * atlas.DIM, (oy - 1) * atlas.DIM, 0, 1, 1, 0, atlas.DIM)
+  local x, y = self:pos()
+  batch:add(self.fx.frames[frame], (x - 1) * atlas.DIM, (y - 1) * atlas.DIM, 0, 1, 1, 0, atlas.DIM)
 end
 
 function Bot:update(dt)
@@ -108,16 +109,26 @@ function Bot:update(dt)
         self.dir = moveDir(self)
       end
     end
-  elseif orbis.devices[self.field] then
-    self.task = true
-    self.anim = self.anim + 2.0 * dt
-    self.anim = self.anim > 1.0 and self.anim - 1.0 or self.anim
   else
-    self.task = false
-    self.anim = 0.0
+    local device = orbis.devices[self.field]
+
+    if device and device:active() then
+      self.task = true
+      self.anim = self.anim + 2.0 * dt
+      self.anim = self.anim > 1.0 and self.anim - 1.0 or self.anim
+
+      if device.building then
+        device.building = device.building + net.dt
+
+        if device.building >= device.buildTime then
+          device.building = nil 
+        end
+      end
+    else
+      self.task = false
+      self.anim = 0.0
+    end
   end
 end
 
 orbis.Object.Bot = Bot
-
-return Bot

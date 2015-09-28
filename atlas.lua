@@ -38,12 +38,12 @@ local atlas = {
     },
     [07] = {
       layers   = { 3, nil },
-      space    = false,
+      space    = true,
       external = true
     },
     [08] = {
       layers   = { 4, nil },
-      space    = false,
+      space    = true,
       external = true
     },
     [70] = {
@@ -95,7 +95,7 @@ local function sprite(x, y, width, height, offsetX, offsetY)
 end
 
 local function sound(name)
-  return ls.newSoundData(string.format('sfx/%s.wav', name))
+  return ls.newSoundData(string.format('sfx/%s.ogg', name))
 end
 
 function atlas.init()
@@ -124,7 +124,7 @@ function atlas.init()
     quad(0, 6, 1, 2), quad(1, 6, 1, 2), quad(2, 6, 1, 2), quad(3, 6, 1, 2)
   }
 
-  atlas.box      = quad(4, 11, 1, 1)
+  atlas.toolbox  = quad(3, 12, 1, 1)
   atlas.terminal = sprite(0, 10, 3, 3, 1, 2)
   atlas.server   = sprite(0, 8, 3, 2, 1, 1)
   atlas.switch   = sprite(3, 8, 2, 2, 1, 1)
@@ -136,7 +136,8 @@ function atlas.init()
   atlas.device   = quad(15, 14, 1, 1)
   atlas.dest     = quad(15, 15, 1, 1)
 
-  atlas.step     = sound('footstep1')
+  atlas.footstep = sound('footstep')
+  atlas.building = sound('event')
 end
 
 return atlas

@@ -1,16 +1,19 @@
 local atlas  = require 'atlas'
 local net    = require 'net'
 local orbis  = require 'orbis'
-local Bot    = require 'Bot'
-local Device = require 'Device'
+local _      = require 'Bot'
+local _      = require 'Device'
 local ui     = require 'ui'
 local stream = require 'stream'
-local le     = love.event
 
 local game = {}
 
 function game.keyPressed(key)
   ui.keyPressed(key)
+
+  if ui.active() then
+    return
+  end
 
   if key == '1' then
     net.timeWarp = 2
@@ -27,6 +30,10 @@ function game.keyPressed(key)
     starting version 337]],
     { 'Yes', 'No' })
   end
+end
+
+function game.textInput(char)
+  ui.textInput(char)
 end
 
 function game.mousePressed(x, y, button)
@@ -56,12 +63,12 @@ function game.init()
     net.init()
     orbis.init({ map = 'maps/warehouse' })
 
-    orbis.actor = Bot:new{ field = orbis.field(4, 4) }
+    orbis.actor = orbis.Object.Bot:new{ field = orbis.field(4, 4) }
     orbis.actor:place()
 
-    Device.Warning:new{ field = orbis.field(24, 13) }:place()
-    Device.Server:new{ field = orbis.field(12, 6) }:place()
-    Device.Switch:new{ field = orbis.field(20, 10) }:place()
+    orbis.Object.Warning:new{ field = orbis.field(24, 13) }:place()
+    orbis.Object.Server:new{ field = orbis.field(12, 6) }:place()
+    orbis.Object.Switch:new{ field = orbis.field(20, 10) }:place()
   end
 end
 
@@ -84,10 +91,6 @@ function game.update(dt)
   end
 
   ui.update(dt)
-
-  if ui.selection == 2 then
-    le.quit()
-  end
 end
 
 return game

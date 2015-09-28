@@ -35,8 +35,8 @@ function net.save()
 end
 
 function net.update(dt)
-  dt       = WARP_LEVELS[net.timeWarp] * dt
-  net.time = net.time + dt
+  net.dt   = WARP_LEVELS[net.timeWarp] * dt
+  net.time = net.time + net.dt
 
   if net.time > 86400 then
     net.time = net.time - 86400

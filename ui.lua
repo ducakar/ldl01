@@ -1,10 +1,12 @@
-local atlas  = require 'atlas'
-local net    = require 'net'
-local orbis  = require 'orbis'
-local lg     = love.graphics
-local lm     = love.mouse
+local atlas = require 'atlas'
+local net   = require 'net'
+local orbis = require 'orbis'
+local lg    = love.graphics
+local lk    = love.keyboard
+local lm    = love.mouse
 
-local ASCII      = [[ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~€]]
+local ASCII      = [[ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~]]
+local CHARS      = ASCII .. [[€]]
 local MARGINX    = 78
 local MARGINY    = 20
 local BOX_MARGIN = 2
@@ -14,6 +16,11 @@ local font       = nil
 
 local mouseX     = 0
 local mouseY     = 0
+local inputOn    = false
+local inputX     = 0
+local inputY     = 0
+local inputText  = ''
+local caretTime  = 0.0
 
 local boxX       = MARGINX
 local boxY       = MARGINY
@@ -28,7 +35,7 @@ local choiceY    = nil
 
 local buildCue   = nil
 
-local ui = {}
+local ui         = {}
 
 local function mouseInside(x, y, width, height)
   return x <= mouseX and mouseX < x + width and y <= mouseY and mouseY < y + height
@@ -36,19 +43,19 @@ end
 
 local function unitNum(x)
   if x > 1.0e18 then
-    return string.format('%.3gE', x / 1.0e18)
+    return string.format('%.3g E', x / 1.0e18)
   elseif x > 1.0e15 then
-    return string.format('%.3gP', x / 1.0e15)
+    return string.format('%.3g P', x / 1.0e15)
   elseif x > 1.0e12 then
-    return string.format('%.3gT', x / 1.0e12)
+    return string.format('%.3g T', x / 1.0e12)
   elseif x > 1.0e9 then
-    return string.format('%.3gG', x / 1.0e9)
+    return string.format('%.3g G', x / 1.0e9)
   elseif x > 1.0e6 then
-    return string.format('%.3gM', x / 1.0e6)
+    return string.format('%.3g M', x / 1.0e6)
   elseif x > 1.0e3 then
-    return string.format('%.3gk', x / 1.0e3)
+    return string.format('%.3g k', x / 1.0e3)
   else
-    return string.format('%d', x)
+    return string.format('%d ', x)
   end
 end
 
@@ -57,6 +64,21 @@ local function drawBox()
   lg.rectangle('fill', boxX - 4, boxY - 4, boxWidth + 8, boxHeight + 8)
   lg.setColor(0, 25, 20)
   lg.rectangle('fill', boxX, boxY, boxWidth, boxHeight)
+end
+
+local function drawInput()
+  lg.setColor(255, 255, 255)
+  lg.print(inputText .. (caretTime > 0.5 and '' or '|'), inputX, inputY)
+end
+
+local function setInput(x, y, initialText)
+  if x then
+    lk.setKeyRepeat(true)
+    inputOn, inputX, inputY, inputText = true, x, y, (initialText or inputText)
+  else
+    lk.setKeyRepeat(false)
+    inputOn = false
+  end
 end
 
 function ui.active()
@@ -73,9 +95,25 @@ function ui.show(text, choices)
   else
     choiceY = nil
   end
+
+  if text then
+    setInput(100, 100)
+  else
+    setInput(false)
+  end
 end
 
 function ui.keyPressed(key)
+  if inputOn then
+    caretTime = -0.25
+
+    if key == 'backspace' then
+      inputText = inputText:sub(1, -2)
+    elseif key == 'return' then
+      setInput(false)
+    end
+  end
+
   if key == ' ' then
     if ui.text and not ui.choices then
       ui.text = nil
@@ -83,15 +121,36 @@ function ui.keyPressed(key)
   end
 end
 
+function ui.textInput(char)
+  if inputOn then
+    local code = char:byte()
+
+    for i = 1, #ASCII do
+      if code == ASCII:byte(i) then
+        inputText = inputText .. char
+        break
+      end
+    end
+  end
+end
+
 function ui.mousePressed(x, y, button)
   mouseX, mouseY = x, y
 
-  if choiceY and button == 'l' then
-    for i, _ in ipairs(ui.choices) do
-      if mouseInside(boxX, choiceY + i * textHeight - 1, boxWidth, textHeight) then
-        ui.show()
-        ui.selection = i
-        break
+  if button then
+    if choiceY then
+      for i, _ in ipairs(ui.choices) do
+        if mouseInside(boxX, choiceY + i * textHeight - 1, boxWidth, textHeight) then
+          ui.show()
+          ui.selection = i
+          break
+        end
+      end
+    elseif buildCue then
+      if buildCue:canPlace() then
+        buildCue:place()
+        buildCue.building = 0.0
+        buildCue = nil
       end
     end
   end
@@ -105,13 +164,25 @@ function ui.draw()
   local hour      = math.floor(net.time / 3600)
   local minute    = math.floor(math.fmod(net.time, 3600) / 60)
   local timeText  = string.format('Day %d %02d:%02d', net.day, hour, minute)
-  local statsText = string.format('%s (%s) Cores\n%s €', unitNum(net.cores), unitNum(net.freeCores), unitNum(net.money))
+  local statsText = string.format('%s (%s) Cores\n%s€', unitNum(net.cores), unitNum(net.freeCores), unitNum(net.money))
 
-  lg.setColor(160, 220, 160)
+  -- Draw build progress circles.
+  for _, object in pairs(orbis.objects) do
+    local progress = object.building and object.building / object.buildTime
+
+    if progress then
+      local x, y = object:pos()
+
+      lg.setColor(80, 160, 255, 160)
+      lg.arc('fill', (x - 0.5) * atlas.DIM, (y - 0.5) * atlas.DIM, 0.5 * atlas.DIM,
+             2.5 * math.pi, (0.25 + progress) * 2.0 * math.pi, 20)
+    end
+  end
+
+  lg.setColor(128, 192, 255)
   lg.printf(statsText, 2, 2, 200, 'left')
   lg.printf(timeText, atlas.WIDTH - 202, 2, 200, 'right')
   lg.draw(atlas.image, atlas.timeWarp[ui.active() and 1 or net.timeWarp], atlas.WIDTH - atlas.DIM, textHeight)
-  -- lg.printf(string.format('%d FPS', love.timer.getFPS()), atlas.WIDTH - 102, 2 + textHeight + atlas.DIM, 100, 'right')
 
   if ui.text then
     drawBox()
@@ -134,39 +205,35 @@ function ui.draw()
     end
   end
 
-  lg.setColor(255, 255, 255)
+  if inputOn then
+    drawInput()
+  end
 
   if buildCue then
-    local fieldX, fieldY = math.floor(mouseX / atlas.DIM) + 1, math.floor(mouseY / atlas.DIM) + 1
+    local x, y   = math.floor(mouseX / atlas.DIM) + 1, math.floor(mouseY / atlas.DIM) + 1
     local sprite = buildCue.fx.sprite
 
-    if buildCue:canPlace(orbis.field(fieldX, fieldY)) then
+    buildCue.field = orbis.field(x, y)
+
+    if buildCue:canPlace(buildCue.field) then
       lg.setColor(128, 255, 128, 128)
     else
       lg.setColor(255, 0, 0, 128)
     end
 
-    lg.draw(atlas.image, sprite.quad, (fieldX - 1) * atlas.DIM, (fieldY - 1) * atlas.DIM, 0, 1, 1, sprite.offsetX, sprite.offsetY)
-    lg.setColor(255, 255, 255)
+    lg.draw(atlas.image, sprite.quad, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM, 0, 1, 1, sprite.offsetX, sprite.offsetY)
   end
 
-  for _, object in pairs(orbis.objects) do
-    if object.progress then
-      local ox, oy = object:pos()
-
-      lg.setColor(0, 160, 255, 160)
-      lg.arc('fill', (ox - 0.5) * atlas.DIM, (oy - 0.5) * atlas.DIM, 0.5 * atlas.DIM,
-             2.5 * math.pi, (0.25 + object.progress) * 2.0 * math.pi)
-    end
-  end
+  lg.setColor(255, 255, 255)
 end
 
-function ui.update()
+function ui.update(dt)
+  caretTime = math.fmod(caretTime + dt, 1.0)
 end
 
 function ui.init()
   cursor     = lm.newCursor('gfx/cursor.png')
-  font       = lg.newImageFont('gfx/font.png', ASCII)
+  font       = lg.newImageFont('gfx/font.png', CHARS)
 
   boxWidth   = atlas.WIDTH - 2 * MARGINX
   boxHeight  = atlas.HEIGHT - 2 * MARGINY
