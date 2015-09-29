@@ -131,9 +131,11 @@ function atlas.init()
   atlas.warning  = sprite(4, 10, 1, 2, 0, 1)
   atlas.timeWarp = { quad(15, 0, 1, 1), quad(15, 1, 1, 1), quad(15, 2, 1, 1), quad(15, 3, 1, 1), quad(15, 4, 1, 1) }
 
+  atlas.public   = quad(15, 9, 1, 1)
+  atlas.covert   = quad(15, 8, 1, 1)
+  atlas.science  = quad(15, 7, 1, 1)
+
   atlas.destroy  = quad(15, 12, 1, 1)
-  atlas.build    = quad(15, 13, 1, 1)
-  atlas.device   = quad(15, 14, 1, 1)
   atlas.dest     = quad(15, 15, 1, 1)
 
   atlas.footstep = sound('footstep')

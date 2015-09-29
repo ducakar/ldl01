@@ -185,7 +185,7 @@ function orbis.draw()
 
         if object then
           local colour = orbis.externals[objField] and externalColour or internalColour
-          local alpha  = object.building and 128 or 255
+          local alpha  = object.building and 64 + 191 * (object.building / object.buildTime) or 255
 
           objectsBatch:setColor(colour[1], colour[2], colour[3], alpha)
           object:draw(objectsBatch)
@@ -194,17 +194,20 @@ function orbis.draw()
         objField = objField + 1
       end
       if x ~= 0 then
-        local wall = orbis.tiles[wallField]
+        local device = orbis.devices[wallField]
+        local wall   = orbis.tiles[wallField]
+        local quad   = atlas.FIELDS[wall].quads[2]
 
-        if wall then
-          local quad = atlas.FIELDS[wall].quads[2]
+        if device and device.building then
+          local colour = orbis.externals[objField] and externalColour or internalColour
 
-          if quad then
-            local colour = orbis.externals[wallField] and externalColour or internalColour
+          objectsBatch:setColor(colour[1], colour[2], colour[3], 255)
+          objectsBatch:add(atlas.toolbox, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM, 0, 1, 1, 0, 0)
+        elseif quad then
+          local colour = orbis.externals[wallField] and externalColour or internalColour
 
-            objectsBatch:setColor(colour[1], colour[2], colour[3])
-            objectsBatch:add(quad, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM, 0, 1, 1, 0, atlas.DIM)
-          end
+          objectsBatch:setColor(colour[1], colour[2], colour[3])
+          objectsBatch:add(quad, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM, 0, 1, 1, 0, atlas.DIM)
         end
 
         wallField = wallField + 1

@@ -166,23 +166,22 @@ function ui.draw()
   local timeText  = string.format('Day %d %02d:%02d', net.day, hour, minute)
   local statsText = string.format('%s (%s) Cores\n%s€', unitNum(net.cores), unitNum(net.freeCores), unitNum(net.money))
 
-  -- Draw build progress circles.
-  for _, object in pairs(orbis.objects) do
-    local progress = object.building and object.building / object.buildTime
-
-    if progress then
-      local x, y = object:pos()
-
-      lg.setColor(80, 160, 255, 160)
-      lg.arc('fill', (x - 0.5) * atlas.DIM, (y - 0.5) * atlas.DIM, 0.5 * atlas.DIM,
-             2.5 * math.pi, (0.25 + progress) * 2.0 * math.pi, 20)
-    end
-  end
-
   lg.setColor(128, 192, 255)
   lg.printf(statsText, 2, 2, 200, 'left')
   lg.printf(timeText, atlas.WIDTH - 202, 2, 200, 'right')
   lg.draw(atlas.image, atlas.timeWarp[ui.active() and 1 or net.timeWarp], atlas.WIDTH - atlas.DIM, textHeight)
+
+  lg.setColor(192, 255, 128)
+  lg.draw(atlas.image, atlas.public, 100, atlas.HEIGHT - 16)
+  lg.printf(string.format('%.2f %%', net.chances.public), 116, atlas.HEIGHT - 12, 42, 'right')
+
+  lg.setColor(255, 192, 128)
+  lg.draw(atlas.image, atlas.covert, 200, atlas.HEIGHT - 16)
+  lg.printf(string.format('%.2f %%', net.chances.covert), 216, atlas.HEIGHT - 12, 42, 'right')
+
+  lg.setColor(128, 255, 192)
+  lg.draw(atlas.image, atlas.science, 300, atlas.HEIGHT - 16)
+  lg.printf(string.format('%.2f %%', net.chances.science), 316, atlas.HEIGHT - 12, 42, 'right')
 
   if ui.text then
     drawBox()

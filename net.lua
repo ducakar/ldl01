@@ -1,9 +1,14 @@
 local WARP_LEVELS = { 0.0, 1.0, 60.0, 3600.0, 86400.0 }
 
 local net = {
-  servers = {},
-  time      = 0.0,
+  servers   = {},
+  chances   = {
+    public  = 0.0,
+    covert  = 0.0,
+    science = 0.0
+  },
   day       = 1,
+  time      = 0.0,
   timeWarp  = 2,
   cores     = 1200000,
   freeCores = 200000,
@@ -13,6 +18,7 @@ local net = {
 function net.init(o)
   if o then
     net.servers   = o.servers
+    net.chances   = o.chances
     net.time      = o.time
     net.day       = o.day
     net.timeWarp  = o.timeWarp
@@ -25,6 +31,7 @@ end
 function net.save()
   return {
     servers   = net.servers,
+    chances   = net.chances,
     time      = net.time,
     day       = net.day,
     timeWarp  = net.timeWarp,

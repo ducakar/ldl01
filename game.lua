@@ -5,8 +5,13 @@ local _      = require 'Bot'
 local _      = require 'Device'
 local ui     = require 'ui'
 local stream = require 'stream'
+local la     = love.audio
+local lf     = love.filesystem
 
-local game = {}
+local tracks     = {}
+local trackIndex = 0
+local music      = nil
+local game       = {}
 
 function game.keyPressed(key)
   ui.keyPressed(key)
@@ -70,6 +75,8 @@ function game.init()
     orbis.Object.Server:new{ field = orbis.field(12, 6) }:place()
     orbis.Object.Switch:new{ field = orbis.field(20, 10) }:place()
   end
+
+  tracks = lf.getDirectoryItems('music')
 end
 
 function game.quit()
@@ -91,6 +98,13 @@ function game.update(dt)
   end
 
   ui.update(dt)
+
+  if (not music or music:isStopped()) and #tracks ~= 0 then
+    trackIndex = math.fmod(trackIndex + 1, #tracks)
+
+    music = la.newSource('music/' .. tracks[trackIndex])
+    music:play()
+  end
 end
 
 return game
