@@ -99,9 +99,12 @@ local function sound(name)
 end
 
 function atlas.init()
+  atlas.earth      = lg.newShader('gfx/earth.frag')
   atlas.earthDay   = lg.newImage('gfx/earthDay.jpg')
   atlas.earthNight = lg.newImage('gfx/earthNight.jpg')
   atlas.image      = lg.newImage('gfx/atlas.png')
+
+  atlas.earth:send('nightImage', atlas.earthNight)
 
   imageWidth, imageHeight = atlas.image:getDimensions()
 

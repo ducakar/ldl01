@@ -1,7 +1,7 @@
 local atlas = require 'atlas'
 local lg    = love.graphics
 
-local WARP_LEVELS    = { 0.0, 1.0, 60.0, 3600.0, 86400.0 }
+local WARP_LEVELS    = { 0.0, 1.0, 60.0, 60.0 ^ 2, 60.0 ^ 3 }
 local DISCOVER_DRAIN = 1.0 - 0.000005
 
 local net = {
@@ -54,7 +54,11 @@ end
 
 function net.draw()
   lg.clear()
-  lg.draw((net.time < 6 * 3600 or net.time > 18 * 3600) and atlas.earthNight or atlas.earthDay, 0, 22)
+  lg.setShader(atlas.earth)
+  atlas.earth:send('dayTime', net.time)
+  atlas.earth:send('yearTime', math.fmod(net.day, 365.25))
+  lg.draw(atlas.earthDay, 0, 22)
+  lg.setShader()
 end
 
 function net.update(dt)
