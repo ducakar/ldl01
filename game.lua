@@ -9,7 +9,7 @@ local la     = love.audio
 local lf     = love.filesystem
 
 local tracks     = {}
-local trackIndex = 0
+local trackIndex = 1
 local music      = nil
 local game       = {}
 
@@ -20,7 +20,9 @@ function game.keyPressed(key)
     return
   end
 
-  if key == '1' then
+  if key == 'tab' then
+    net.mapView = not net.mapView
+  elseif key == '1' then
     net.timeWarp = 2
   elseif key == '2' then
     net.timeWarp = 3
@@ -44,6 +46,8 @@ end
 function game.mousePressed(x, y, button)
   if ui.active() then
     ui.mousePressed(x, y, button)
+  elseif net.mapView then
+    net.mousePressed(x, y, button)
   else
     local fieldX, fieldY = math.floor(x / atlas.DIM) + 1, math.floor(y / atlas.DIM) + 1
 
@@ -87,7 +91,12 @@ function game.quit()
 end
 
 function game.draw()
-  orbis.draw()
+  if net.mapView then
+    net.draw()
+  else
+    orbis.draw()
+  end
+
   ui.draw()
 end
 
@@ -102,7 +111,7 @@ function game.update(dt)
   if (not music or music:isStopped()) and #tracks ~= 0 then
     trackIndex = math.fmod(trackIndex + 1, #tracks)
 
-    music = la.newSource('music/' .. tracks[trackIndex])
+    music = la.newSource('music/' .. tracks[1 + trackIndex])
     music:play()
   end
 end

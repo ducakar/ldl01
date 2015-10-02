@@ -99,7 +99,10 @@ local function sound(name)
 end
 
 function atlas.init()
-  atlas.image = lg.newImage('gfx/atlas.png')
+  atlas.earthDay   = lg.newImage('gfx/earthDay.jpg')
+  atlas.earthNight = lg.newImage('gfx/earthNight.jpg')
+  atlas.image      = lg.newImage('gfx/atlas.png')
+
   imageWidth, imageHeight = atlas.image:getDimensions()
 
   for _, field in pairs(atlas.FIELDS) do
@@ -124,16 +127,17 @@ function atlas.init()
     quad(0, 6, 1, 2), quad(1, 6, 1, 2), quad(2, 6, 1, 2), quad(3, 6, 1, 2)
   }
 
-  atlas.toolbox  = quad(3, 12, 1, 1)
-  atlas.terminal = sprite(0, 10, 3, 3, 1, 2)
-  atlas.server   = sprite(0, 8, 3, 2, 1, 1)
-  atlas.switch   = sprite(3, 8, 2, 2, 1, 1)
-  atlas.warning  = sprite(4, 10, 1, 2, 0, 1)
+  atlas.toolbox  = quad(0, 8, 1, 1)
+  atlas.terminal = sprite(1, 8, 3, 3, 1, 2)
+  atlas.server   = sprite(0, 11, 3, 2, 1, 1)
+  atlas.switch   = sprite(3, 11, 2, 2, 1, 1)
+  atlas.warning  = sprite(0, 9, 1, 2, 0, 1)
   atlas.timeWarp = { quad(15, 0, 1, 1), quad(15, 1, 1, 1), quad(15, 2, 1, 1), quad(15, 3, 1, 1), quad(15, 4, 1, 1) }
 
-  atlas.public   = quad(15, 9, 1, 1)
-  atlas.covert   = quad(15, 8, 1, 1)
-  atlas.science  = quad(15, 7, 1, 1)
+  atlas.discover = quad(15, 5, 1, 1)
+  atlas.public   = quad(15, 6, 1, 1)
+  atlas.covert   = quad(15, 7, 1, 1)
+  atlas.science  = quad(15, 8, 1, 1)
 
   atlas.destroy  = quad(15, 12, 1, 1)
   atlas.dest     = quad(15, 15, 1, 1)

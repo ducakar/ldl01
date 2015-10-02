@@ -59,6 +59,14 @@ local function unitNum(x)
   end
 end
 
+local function drawChance(x, quad, chance, critical)
+  local t = math.min(chance / critical, 1.0)
+
+  lg.setColor(math.min(64 + t * 512, 255), 192 - t * 64, 128)
+  lg.draw(atlas.image, quad, x, atlas.HEIGHT - 16)
+  lg.printf(string.format('%.2f %%', chance * 100.0), x + 15, atlas.HEIGHT - 11, 42, 'right')
+end
+
 local function drawBox()
   lg.setColor(80, 70, 60)
   lg.rectangle('fill', boxX - 4, boxY - 4, boxWidth + 8, boxHeight + 8)
@@ -168,20 +176,13 @@ function ui.draw()
 
   lg.setColor(128, 192, 255)
   lg.printf(statsText, 2, 2, 200, 'left')
-  lg.printf(timeText, atlas.WIDTH - 202, 2, 200, 'right')
-  lg.draw(atlas.image, atlas.timeWarp[ui.active() and 1 or net.timeWarp], atlas.WIDTH - atlas.DIM, textHeight)
+  lg.printf(timeText, atlas.WIDTH - 208, 2, 200, 'right')
+  lg.draw(atlas.image, atlas.timeWarp[ui.active() and 1 or net.timeWarp], atlas.WIDTH - 11, 1)
 
-  lg.setColor(192, 255, 128)
-  lg.draw(atlas.image, atlas.public, 100, atlas.HEIGHT - 16)
-  lg.printf(string.format('%.2f %%', net.chances.public), 116, atlas.HEIGHT - 12, 42, 'right')
-
-  lg.setColor(255, 192, 128)
-  lg.draw(atlas.image, atlas.covert, 200, atlas.HEIGHT - 16)
-  lg.printf(string.format('%.2f %%', net.chances.covert), 216, atlas.HEIGHT - 12, 42, 'right')
-
-  lg.setColor(128, 255, 192)
-  lg.draw(atlas.image, atlas.science, 300, atlas.HEIGHT - 16)
-  lg.printf(string.format('%.2f %%', net.chances.science), 316, atlas.HEIGHT - 12, 42, 'right')
+  drawChance(0, atlas.discover, net.discover, 1.00)
+  drawChance(110, atlas.public, net.chances.public, 0.20)
+  drawChance(220, atlas.covert, net.chances.covert, 0.20)
+  drawChance(330, atlas.science, net.chances.science, 0.20)
 
   if ui.text then
     drawBox()

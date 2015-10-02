@@ -1,5 +1,4 @@
-Game code
-=========
+## Game Code
 
 Copyright © 2015 Davorin Učakar
 
@@ -21,14 +20,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
 FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 DEALINGS IN THE SOFTWARE.
 
-Artwork
-=======
 
-All game artwork except the fonts is Copyright © 2015 Davorin Učakar and is licensed
-under [CC BY-SA 4.0](http://creativecommons.org/licenses/by-sa/4.0/deed).
+## Game Data
 
-Fonts
-=====
+* gfx/atlas, gfx/cursor, gfx/robo2d, sfx/*
 
-oldschool font (http://opengameart.org/content/ascii-bitmap-font-oldschool) by
-domsson is licensed under [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+  Copyright © 2015 Davorin Učakar, [CC BY-SA 4.0](http://creativecommons.org/licenses/by-sa/4.0/deed).
+
+* gfx/font
+
+  [oldschool font](http://opengameart.org/content/ascii-bitmap-font-oldschool) by domsson,
+  [CC0](https://creativecommons.org/publicdomain/zero/1.0/).
+
+* gfx/earthDay, gfx/earthNight
+
+  [Blue Marble 2002](http://earthobservatory.nasa.gov/Features/BlueMarble/BlueMarble_2002.php)
+  by NASA & NASA's Earth Observatory.

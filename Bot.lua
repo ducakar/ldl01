@@ -35,24 +35,26 @@ function Bot:pos()
 end
 
 function Bot:setPathTo(destField)
-  if self.path then
-    orbis.spaces[self.path[1]] = true
-
-    self.path = orbis.findPath(self.path[#self.path], destField) or self.path
-
-    orbis.spaces[self.path[1]] = false
-  else
-    self.path = orbis.findPath(self.field, destField)
-
+  if orbis.spaces[destField] then
     if self.path then
-      table.remove(self.path)
+      orbis.spaces[self.path[1]] = true
 
-      self.dir  = moveDir(self)
-      self.task = false
-      self.anim = 0.0
+      self.path = orbis.findPath(self.path[#self.path], destField) or self.path
 
-      orbis.spaces[self.field] = true
-      orbis.spaces[destField] = false
+      orbis.spaces[self.path[1]] = false
+    else
+      self.path = orbis.findPath(self.field, destField)
+
+      if self.path then
+        table.remove(self.path)
+
+        self.dir  = moveDir(self)
+        self.task = false
+        self.anim = 0.0
+
+        orbis.spaces[self.field] = true
+        orbis.spaces[destField] = false
+      end
     end
   end
 end
@@ -121,7 +123,7 @@ function Bot:update(dt)
         device.building = device.building + net.dt
 
         if device.building >= device.buildTime then
-          device.building = nil 
+          device.building = nil
         end
       end
     else
