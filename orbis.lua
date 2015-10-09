@@ -11,6 +11,7 @@ local externalColour = { 160, 160, 160 }
 local internalsBatch = lg.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'static')
 local externalsBatch = lg.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'static')
 local objectsBatch   = lg.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'stream')
+local buildCue       = nil
 
 local orbis = {
   Object    = {
@@ -30,10 +31,8 @@ local orbis = {
 }
 orbis.Object.__index = orbis.Object
 
-function orbis.Object:new(o)
-  o = o or {}
-  o.class = o.class or self.class
-  return setmetatable(o, self)
+local function posFromScreen(x, y)
+  return math.floor(x / atlas.DIM) + 1, math.floor(y / atlas.DIM) + 1
 end
 
 local function pathStep(path, depth, field)
@@ -76,6 +75,12 @@ local function pathStep(path, depth, field)
   end
 end
 
+function orbis.Object:new(o)
+  o = o or {}
+  o.class = o.class or self.class
+  return setmetatable(o, self)
+end
+
 function orbis.field(x, y)
   return (y - 1) * orbis.width + x
 end
@@ -94,6 +99,36 @@ function orbis.findPath(srcField, destField)
     pathFields[destField] = 0
 
     return pathStep(nil, 1, srcField)
+  end
+end
+
+function orbis.buildCue(class)
+  if class then
+    buildCue = orbis.Object[class]:new()
+    buildCue.building = buildCue.buildTime and 0.0
+  else
+    buildCue = nil
+  end
+end
+
+function orbis.mousePressed(x, y, button)
+  if buildCue then
+    if button == 'r' then
+      buildCue = nil
+    elseif buildCue:canPlace() then
+      buildCue:place()
+      buildCue = nil
+    end
+  else
+
+
+    orbis.actor:setPathTo(orbis.field(posFromScreen(x, y)))
+  end
+end
+
+function orbis.mouseMoved(x, y)
+  if buildCue then
+    buildCue.field = orbis.field(posFromScreen(x, y))
   end
 end
 
@@ -157,11 +192,9 @@ function orbis.save()
 end
 
 function orbis.draw()
-  local colourFactor = 0.5 + math.min(0.5, math.max(-0.5, 0.7 * math.cos(net.time / 43200.0 * math.pi)))
-
-  externalColour[1] = 255 + colourFactor * (100 - 255)
-  externalColour[2] = 255 + colourFactor * (100 - 255)
-  externalColour[3] = 255 + colourFactor * (140 - 255)
+  externalColour[1] = 100 + net.light * 155
+  externalColour[2] = 100 + net.light * 155
+  externalColour[3] = 140 + net.light * 115
 
   lg.setColor(internalColour[1], internalColour[2], internalColour[3])
   lg.draw(internalsBatch)
@@ -217,6 +250,19 @@ function orbis.draw()
 
   lg.draw(objectsBatch)
   objectsBatch:clear()
+
+  if buildCue then
+    local x, y   = buildCue:pos()
+    local sprite = buildCue.fx.sprite
+
+    if buildCue:canPlace(buildCue.field) then
+      lg.setColor(128, 255, 128, 128)
+    else
+      lg.setColor(255, 0, 0, 128)
+    end
+
+    lg.draw(atlas.image, sprite.quad, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM, 0, 1, 1, sprite.offsetX, sprite.offsetY)
+  end
 end
 
 function orbis.update(dt)

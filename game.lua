@@ -1,5 +1,5 @@
-local atlas  = require 'atlas'
 local net    = require 'net'
+local Server = require 'Server'
 local orbis  = require 'orbis'
 local _      = require 'Bot'
 local _      = require 'Device'
@@ -21,7 +21,17 @@ function game.keyPressed(key)
   end
 
   if key == 'tab' then
-    net.mapView = not net.mapView
+    if net.mapView then
+      net.mapView = false
+      net.buildCue(nil)
+    elseif not orbis.actor.path then
+      local device = orbis.devices[orbis.actor.field]
+
+      if device and device.class == 'Terminal' then
+        orbis.buildCue(nil)
+        net.mapView = true
+      end
+    end
   elseif key == '1' then
     net.timeWarp = 2
   elseif key == '2' then
@@ -49,14 +59,18 @@ function game.mousePressed(x, y, button)
   elseif net.mapView then
     net.mousePressed(x, y, button)
   else
-    local fieldX, fieldY = math.floor(x / atlas.DIM) + 1, math.floor(y / atlas.DIM) + 1
-
-    orbis.actor:setPathTo(orbis.field(fieldX, fieldY))
+    orbis.mousePressed(x, y, button)
   end
 end
 
 function game.mouseMoved(x, y)
-  ui.mouseMoved(x, y)
+  if ui.active() then
+    ui.mouseMoved(x, y)
+  elseif net.mapView then
+    net.mouseMoved(x, y)
+  else
+    orbis.mouseMoved(x, y)
+  end
 end
 
 function game.init()
@@ -81,6 +95,11 @@ function game.init()
   end
 
   tracks = lf.getDirectoryItems('music')
+
+  net.servers = {
+    Server:new{ location = { 20, 0 } },
+    Server:new{ location = { -160, 30 } }
+  }
 end
 
 function game.quit()

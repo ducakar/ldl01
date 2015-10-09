@@ -98,10 +98,31 @@ local function sound(name)
   return ls.newSoundData(string.format('sfx/%s.ogg', name))
 end
 
+local function generateLand()
+  local w, h = atlas.earthDay:getDimensions()
+  local data = atlas.earthDay:getData()
+
+  for y = 0, h - 1 do
+    for x = 0, w - 1 do
+      local r, g, b = data:getPixel(x, y)
+      local isLand = b - 1.0 * g - 2.0 * r < 0.1 * 255
+
+      if isLand then
+        data:setPixel(x, y, 255, 255, 255, 255)
+      else
+        data:setPixel(x, y, 0, 0, 0, 255)
+      end
+    end
+  end
+
+  return lg.newImage(data)
+end
+
 function atlas.init()
   atlas.earth      = lg.newShader('gfx/earth.frag')
   atlas.earthDay   = lg.newImage('gfx/earthDay.jpg')
   atlas.earthNight = lg.newImage('gfx/earthNight.jpg')
+  atlas.earthLand  = generateLand()
   atlas.image      = lg.newImage('gfx/atlas.png')
 
   atlas.earth:send('nightImage', atlas.earthNight)
@@ -118,7 +139,7 @@ function atlas.init()
       field.quads[1] = quad(4, floor, 1, 1)
     end
     if wall then
-      field.quads[2] = quad(5 + math.floor(wall / 8), math.fmod(wall, 8) * 2, 1, 2)
+      field.quads[2] = quad(5 + math.floor(wall / 4), math.fmod(wall, 4) * 2, 1, 2)
     end
   end
 
@@ -130,20 +151,24 @@ function atlas.init()
     quad(0, 6, 1, 2), quad(1, 6, 1, 2), quad(2, 6, 1, 2), quad(3, 6, 1, 2)
   }
 
-  atlas.toolbox  = quad(0, 8, 1, 1)
-  atlas.terminal = sprite(1, 8, 3, 3, 1, 2)
-  atlas.server   = sprite(0, 11, 3, 2, 1, 1)
-  atlas.switch   = sprite(3, 11, 2, 2, 1, 1)
-  atlas.warning  = sprite(0, 9, 1, 2, 0, 1)
+  atlas.toolbox  = quad(9, 0, 1, 1)
+  atlas.terminal = sprite(10, 0, 3, 3, 1, 2)
+  atlas.server   = sprite( 9, 3, 3, 2, 1, 1)
+  atlas.switch   = sprite(12, 3, 2, 2, 1, 1)
+  atlas.warning  = sprite( 9, 1, 1, 2, 0, 1)
+  atlas.panel    = sprite(13, 0, 1, 3, 0, 2)
   atlas.timeWarp = { quad(15, 0, 1, 1), quad(15, 1, 1, 1), quad(15, 2, 1, 1), quad(15, 3, 1, 1), quad(15, 4, 1, 1) }
 
-  atlas.discover = quad(15, 5, 1, 1)
-  atlas.public   = quad(15, 6, 1, 1)
-  atlas.covert   = quad(15, 7, 1, 1)
-  atlas.science  = quad(15, 8, 1, 1)
+  atlas.discover = quad(14, 0, 1, 1)
+  atlas.public   = quad(14, 1, 1, 1)
+  atlas.covert   = quad(14, 2, 1, 1)
+  atlas.science  = quad(14, 3, 1, 1)
 
-  atlas.destroy  = quad(15, 12, 1, 1)
-  atlas.dest     = quad(15, 15, 1, 1)
+  atlas.destroy  = quad(14, 5, 1, 1)
+
+  atlas.base     = quad(15, 5, 1, 1)
+  atlas.center   = quad(15, 6, 1, 1)
+  atlas.dest     = quad(15, 7, 1, 1)
 
   atlas.footstep = sound('footstep')
   atlas.building = sound('event')

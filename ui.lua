@@ -1,6 +1,5 @@
 local atlas = require 'atlas'
 local net   = require 'net'
-local orbis = require 'orbis'
 local lg    = love.graphics
 local lk    = love.keyboard
 local lm    = love.mouse
@@ -32,8 +31,6 @@ local textWidth  = nil
 local textHeight = nil
 local choiceX    = textX + 8
 local choiceY    = nil
-
-local buildCue   = nil
 
 local ui         = {}
 
@@ -90,7 +87,7 @@ local function setInput(x, y, initialText)
 end
 
 function ui.active()
-  return ui.text or buildCue
+  return ui.text
 end
 
 function ui.show(text, choices)
@@ -120,10 +117,8 @@ function ui.keyPressed(key)
     elseif key == 'return' then
       setInput(false)
     end
-  end
-
-  if key == ' ' then
-    if ui.text and not ui.choices then
+  elseif ui.text then
+    if not ui.choices then
       ui.text = nil
     end
   end
@@ -142,23 +137,15 @@ function ui.textInput(char)
   end
 end
 
-function ui.mousePressed(x, y, button)
+function ui.mousePressed(x, y)
   mouseX, mouseY = x, y
 
-  if button then
-    if choiceY then
-      for i, _ in ipairs(ui.choices) do
-        if mouseInside(boxX, choiceY + i * textHeight - 1, boxWidth, textHeight) then
-          ui.show()
-          ui.selection = i
-          break
-        end
-      end
-    elseif buildCue then
-      if buildCue:canPlace() then
-        buildCue:place()
-        buildCue.building = 0.0
-        buildCue = nil
+  if choiceY then
+    for i, _ in ipairs(ui.choices) do
+      if mouseInside(boxX, choiceY + i * textHeight - 1, boxWidth, textHeight) then
+        ui.show()
+        ui.selection = i
+        break
       end
     end
   end
@@ -171,7 +158,7 @@ end
 function ui.draw()
   local hour      = math.floor(net.time / 3600)
   local minute    = math.floor(math.fmod(net.time, 3600) / 60)
-  local timeText  = string.format('Day %d %02d:%02d', net.day, hour, minute)
+  local timeText  = string.format('Year %d Day %d %02d:%02d', net.year, net.day, hour, minute)
   local statsText = string.format('%s (%s) Cores\n%s€', unitNum(net.cores), unitNum(net.freeCores), unitNum(net.money))
 
   lg.setColor(128, 192, 255)
@@ -207,21 +194,6 @@ function ui.draw()
 
   if inputOn then
     drawInput()
-  end
-
-  if buildCue then
-    local x, y   = math.floor(mouseX / atlas.DIM) + 1, math.floor(mouseY / atlas.DIM) + 1
-    local sprite = buildCue.fx.sprite
-
-    buildCue.field = orbis.field(x, y)
-
-    if buildCue:canPlace(buildCue.field) then
-      lg.setColor(128, 255, 128, 128)
-    else
-      lg.setColor(255, 0, 0, 128)
-    end
-
-    lg.draw(atlas.image, sprite.quad, (x - 1) * atlas.DIM, (y - 1) * atlas.DIM, 0, 1, 1, sprite.offsetX, sprite.offsetY)
   end
 
   lg.setColor(255, 255, 255)

@@ -146,7 +146,7 @@ local Warning = Device:new{
     0, 0, 2, 0, 0,
     0, 0, 0, 0, 0
   },
-  buildTime = 2 * 3600,
+  buildTime = 3 * 3600,
   internal = false,
   fx = {
     sprite = atlas.warning
@@ -154,7 +154,25 @@ local Warning = Device:new{
 }
 Warning.__index = Warning
 
+local Panel = Device:new{
+  class = 'Panel',
+  fieldMask = {
+    0, 0, 0, 0, 0,
+    0, 0, 1, 0, 0,
+    0, 2, 1, 0, 0,
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0
+  },
+  buildTime = 10 * 3600,
+  internal = false,
+  fx = {
+    sprite = atlas.panel
+  }
+}
+Panel.__index = Panel
+
 orbis.Object.Terminal = Terminal
 orbis.Object.Server   = Server
 orbis.Object.Switch   = Switch
 orbis.Object.Warning  = Warning
+orbis.Object.Panel    = Panel
