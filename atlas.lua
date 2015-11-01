@@ -6,72 +6,116 @@ local atlas = {
   HEIGHT = 288,
   DIM    = 16,
   FIELDS = {
-    [01] = {
+    [00] = {
+      -- grass
       layers   = { 0, nil },
       space    = true,
       external = true
     },
+    [01] = {
+      -- grass-obstructed
+      layers   = { 0, nil },
+      space    = false,
+      external = true
+    },
     [02] = {
+      -- grass + fence-H
       layers   = { 0, 3 },
       space    = false,
       external = true
     },
     [03] = {
+      -- grass + fence-HL
       layers   = { 0, 4 },
       space    = false,
       external = true
     },
     [04] = {
+      -- grass + fence-HR
       layers   = { 0, 5 },
       space    = false,
       external = true
     },
     [05] = {
+      -- grass + fence-VL
       layers   = { 0, 6 },
       space    = false,
       external = true
     },
     [06] = {
+      -- grass + fence-VR
       layers   = { 0, 7 },
       space    = false,
       external = true
     },
     [07] = {
+      -- road-plain
       layers   = { 3, nil },
       space    = true,
       external = true
     },
     [08] = {
+      -- road-dash
       layers   = { 4, nil },
       space    = true,
       external = true
     },
+    [10] = {
+      -- snow
+      layers   = { 1, nil },
+      space    = true,
+      external = true
+    },
+    [11] = {
+      -- snow-obstructed
+      layers   = { 1, nil },
+      space    = false,
+      external = true
+    },
+    [20] = {
+      -- moon
+      layers   = { 1, nil },
+      space    = true,
+      external = true
+    },
+    [21] = {
+      -- moon-obstructed
+      layers   = { 1, nil },
+      space    = false,
+      external = true
+    },
     [70] = {
+      -- floor-concrete
       layers   = { 5, nil },
       space    = true,
       external = false
     },
     [71] = {
+      -- wall-bricks
       layers   = { nil, 0 },
       space    = false,
       external = false
     },
     [80] = {
+      -- floor-dirt
       layers   = { 6, nil },
       space    = true,
       external = false
     },
     [81] = {
+      -- wall-concrete
       layers   = { nil, 1 },
       space    = false,
       external = false
     },
     [90] = {
+      -- floor-hitech
       layers   = { 7, nil },
       space    = true,
       external = false
     },
     [91] = {
+      -- wall-hitech
       layers   = { nil, 2 },
       space    = false,
       external = false

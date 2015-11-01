@@ -120,8 +120,6 @@ function orbis.mousePressed(x, y, button)
       buildCue = nil
     end
   else
-
-
     orbis.actor:setPathTo(orbis.field(posFromScreen(x, y)))
   end
 end

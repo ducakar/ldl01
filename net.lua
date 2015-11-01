@@ -5,6 +5,7 @@ local WARP_LEVELS    = { 0.0, 1.0, 60.0, 60.0 ^ 2, 60.0 ^ 3 }
 local DISCOVER_DRAIN = 1.0 - 0.000005
 local EARTH_WIDTH    = atlas.WIDTH
 local EARTH_HEIGHT   = atlas.HEIGHT - 36
+local EARTH_OFFSET   = 13
 local ICON_HALF      = atlas.DIM / 2
 
 local buildCue = nil
@@ -31,7 +32,7 @@ local net = {
 
 local function position(location)
   local x = EARTH_WIDTH / 2 + location[1] / 360.0 * EARTH_WIDTH - atlas.DIM / 2
-  local y = EARTH_HEIGHT / 2 - location[2] / 180.0 * EARTH_HEIGHT - atlas.DIM / 2 + 22
+  local y = EARTH_HEIGHT / 2 - location[2] / 180.0 * EARTH_HEIGHT - atlas.DIM / 2 + EARTH_OFFSET
   return x, y
 end
 
@@ -59,7 +60,7 @@ function net.mousePressed(x, y, button)
     if button == 'r' then
       buildCue = nil
     else
-      y = y - 22
+      y = y - EARTH_OFFSET
 
       lg.setColor(255, 0, 0, 128)
 
@@ -85,6 +86,7 @@ function net.init(o)
     net.year      = o.year
     net.money     = o.money
     net.discover  = o.discover
+    net.location  = o.location
     net.servers   = o.servers
     net.cores     = o.cores
     net.freeCores = o.freeCores
@@ -92,7 +94,7 @@ function net.init(o)
   end
 
   net.location = { 15, 45 }
-  net.light = lightIntensity()
+  net.light    = lightIntensity()
 end
 
 function net.save()
@@ -103,6 +105,7 @@ function net.save()
     year      = net.year,
     money     = net.money,
     discover  = net.discover,
+    location  = net.location,
     servers   = net.servers,
     cores     = net.cores,
     freeCores = net.freeCores,
@@ -114,7 +117,7 @@ function net.draw()
   lg.clear()
   lg.setShader(atlas.earth)
   atlas.earth:send('times', net.time, net.day)
-  lg.draw(atlas.earthDay, 0, 22)
+  lg.draw(atlas.earthDay, 0, EARTH_OFFSET)
   lg.setShader()
 
   lg.draw(atlas.image, atlas.base, position(net.location))

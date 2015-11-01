@@ -86,17 +86,19 @@ function Device:draw(batch)
 end
 
 local Terminal = Device:new{
-  class = 'Terminal',
-  fieldMask = {
+  class       = 'Terminal',
+  name        = 'Control terminal',
+  description = 'Enables map view and assigning task to computers.',
+  buildTime   = 12 * 3600,
+  fx          = {
+    sprite    = atlas.terminal
+  },
+  fieldMask   = {
     0, 3, 3, 3, 0,
     0, 1, 2, 1, 0,
     0, 1, 1, 1, 0,
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0
-  },
-  buildTime = 12 * 3600,
-  fx = {
-    sprite = atlas.terminal
   }
 }
 Terminal.__index = Terminal
@@ -106,67 +108,76 @@ function Terminal.active()
 end
 
 local Server = Device:new{
-  class = 'Server',
-  fieldMask = {
+  class       = 'Server',
+  name        = 'Server',
+  description = 'Server frame. Components sold separately.',
+  buildTime   = 8 * 3600,
+  fx          = {
+    sprite    = atlas.server
+  },
+  fieldMask   = {
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0,
     0, 1, 1, 1, 0,
     0, 3, 2, 3, 0,
     0, 0, 0, 0, 0
-  },
-  buildTime = 8 * 3600,
-  fx = {
-    sprite = atlas.server
   }
 }
 Server.__index = Server
 
 local Switch = Device:new{
-  class = 'Switch',
-  fieldMask = {
+  class       = 'Switch',
+  name        = 'Network switch',
+  description = 'Improves computing power of servers in your building. Additional upgrades improve efficiency.',
+  buildTime   = 16 * 3600,
+  fx          = {
+    sprite    = atlas.switch
+  },
+  fieldMask   = {
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0,
     0, 1, 1, 0, 0,
     0, 3, 2, 0, 0,
     0, 0, 0, 0, 0
-  },
-  buildTime = 16 * 3600,
-  fx = {
-    sprite = atlas.switch
   }
 }
 Switch.__index = Switch
 
 local Warning = Device:new{
-  class = 'Warning',
-  fieldMask = {
+  class       = 'Warning',
+  name        = 'Warning sign',
+  description = 'A scary warning sign is a simple but effective way for deterring nosey public from sniffing around.',
+  buildTime   = 3 * 3600,
+  internal    = false,
+  fx          = {
+    sprite    = atlas.warning
+  },
+  fieldMask   = {
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0,
     0, 0, 1, 0, 0,
     0, 0, 2, 0, 0,
     0, 0, 0, 0, 0
-  },
-  buildTime = 3 * 3600,
-  internal = false,
-  fx = {
-    sprite = atlas.warning
   }
 }
 Warning.__index = Warning
 
 local Panel = Device:new{
-  class = 'Panel',
-  fieldMask = {
+  class       = 'Panel',
+  name        = 'Solar panel',
+  description = 'Generates a small amount of power during daytime. Additional batteries are required to provide power'
+                .. ' during the nighttime.',
+  buildTime   = 10 * 3600,
+  internal    = false,
+  fx = {
+    sprite    = atlas.panel
+  },
+  fieldMask   = {
     0, 0, 0, 0, 0,
     0, 0, 1, 0, 0,
     0, 2, 1, 0, 0,
     0, 0, 0, 0, 0,
     0, 0, 0, 0, 0
-  },
-  buildTime = 10 * 3600,
-  internal = false,
-  fx = {
-    sprite = atlas.panel
   }
 }
 Panel.__index = Panel
