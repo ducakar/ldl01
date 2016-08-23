@@ -1,7 +1,7 @@
 local atlas  = require 'atlas'
 local lg     = love.graphics
 
-local WARP_LEVELS    = { 0.0, 1.0, 60.0, 60.0 ^ 2, 60.0 ^ 3 }
+local WARP_LEVELS    = {0.0, 1.0, 60.0, 60.0 ^ 2, 60.0 ^ 3}
 local DISCOVER_DRAIN = 1.0 - 0.000005
 local EARTH_WIDTH    = atlas.WIDTH
 local EARTH_HEIGHT   = atlas.HEIGHT - 36
@@ -93,7 +93,7 @@ function net.init(o)
     net.chances   = o.chances
   end
 
-  net.location = { 15, 45 }
+  net.location = {15, 45}
   net.light    = lightIntensity()
 end
 

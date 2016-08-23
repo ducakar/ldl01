@@ -69,7 +69,7 @@ end
 
 function love.load()
   lg.setDefaultFilter('nearest', 'nearest')
-  love.resize(lw.getDimensions())
+  love.resize(lw.getMode())
 
   atlas.init()
   stage = require 'game'

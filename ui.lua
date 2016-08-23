@@ -1,11 +1,15 @@
-local atlas = require 'atlas'
-local net   = require 'net'
-local lg    = love.graphics
-local lk    = love.keyboard
-local lm    = love.mouse
+local atlas  = require 'atlas'
+local net    = require 'net'
+local orbis  = require 'orbis'
+local _      = require 'Device'
+local lg     = love.graphics
+local lk     = love.keyboard
+local lm     = love.mouse
 
 local ASCII      = [[ !"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~]]
 local CHARS      = ASCII .. [[€]]
+local UNITS      = 'EPTGMk'
+local BASES      = {1.0e18, 1.0e15, 1.0e12, 1.0e9, 1.0e6, 1.0e3}
 local MARGINX    = 78
 local MARGINY    = 20
 local BOX_MARGIN = 2
@@ -34,26 +38,37 @@ local choiceY    = nil
 
 local ui         = {}
 
+local Button     = {
+  x      = 0,
+  y      = 0,
+  width  = 0,
+  height = 0,
+  text   = 'button',
+  icon   = nil
+}
+
+function Button:draw()
+  if self.icon then
+    lg.setColor(255, 255, 255)
+    lg.draw(atlas.image, self.icon, self.x, self.y)
+  else
+    lg.setColor(80, 70, 60)
+    lg.rectangle('fill', self.x, self.y, self.width, self.height)
+    lg.printf(self.text, self.x, self.y + 2, self.width, 'center')
+  end
+end
+
 local function mouseInside(x, y, width, height)
   return x <= mouseX and mouseX < x + width and y <= mouseY and mouseY < y + height
 end
 
 local function unitNum(x)
-  if x > 1.0e18 then
-    return string.format('%.3g E', x / 1.0e18)
-  elseif x > 1.0e15 then
-    return string.format('%.3g P', x / 1.0e15)
-  elseif x > 1.0e12 then
-    return string.format('%.3g T', x / 1.0e12)
-  elseif x > 1.0e9 then
-    return string.format('%.3g G', x / 1.0e9)
-  elseif x > 1.0e6 then
-    return string.format('%.3g M', x / 1.0e6)
-  elseif x > 1.0e3 then
-    return string.format('%.3g k', x / 1.0e3)
-  else
-    return string.format('%d ', x)
+  for i = 1, #UNITS do
+    if x > BASES[i] then
+      return string.format('%.3g %c', x / BASES[i], UNITS:byte(i))
+    end
   end
+  return string.format('%d ', x)
 end
 
 local function drawChance(x, quad, chance, critical)
@@ -69,6 +84,18 @@ local function drawBox()
   lg.rectangle('fill', boxX - 4, boxY - 4, boxWidth + 8, boxHeight + 8)
   lg.setColor(0, 25, 20)
   lg.rectangle('fill', boxX, boxY, boxWidth, boxHeight)
+end
+
+local function drawDevice(device)
+  local sprite = device.fx.sprite
+  local x, y, width, height = 100, 100, 200, 100
+
+  lg.setColor(20, 30, 20)
+  lg.rectangle('fill', x, y, width, height)
+  lg.setColor(255, 255, 255)
+  lg.draw(atlas.image, sprite.quad, x - sprite.offsetX + 2 * atlas.DIM, y - sprite.offsetY + 3 * atlas.DIM)
+  lg.print(device.name, x + 2, y + 2)
+  lg.printf(device.description, x + 80, y + 20, 120, 'left')
 end
 
 local function drawInput()
@@ -169,13 +196,15 @@ function ui.draw()
   lg.print(love.timer.getFPS(), atlas.WIDTH - 13, atlas.HEIGHT - 11)
   lg.printf(moneyText, 2, 2, 200, 'left')
   lg.printf(coresText, 80, 2, 200, 'right')
-  lg.printf(timeText, atlas.WIDTH - 208, 2, 200, 'right')
-  lg.draw(atlas.image, atlas.timeWarp[ui.active() and 1 or net.timeWarp], atlas.WIDTH - 11, 1)
+  lg.printf(timeText, atlas.WIDTH - 210, 2, 200, 'right')
+  lg.draw(atlas.image, atlas.timeWarp[ui.active() and 1 or net.timeWarp], atlas.WIDTH - 7, 3)
 
   drawChance(0, atlas.discover, net.discover, 1.00)
   drawChance(110, atlas.public, net.chances.public, 0.20)
   drawChance(220, atlas.covert, net.chances.covert, 0.20)
   drawChance(330, atlas.science, net.chances.science, 0.20)
+
+  -- drawDevice(orbis.Object.Switch)
 
   if ui.text then
     drawBox()
@@ -210,16 +239,18 @@ function ui.update(dt)
 end
 
 function ui.init()
-  cursor     = lm.newCursor('gfx/cursor.png')
-  font       = lg.newImageFont('gfx/font.png', CHARS)
+  if lm.hasCursor() then
+    cursor = lm.newCursor('gfx/cursor.png')
+    lm.setCursor(cursor)
+  end
+
+  font = lg.newImageFont('gfx/font.png', CHARS, 1)
+  lg.setFont(font)
 
   boxWidth   = atlas.WIDTH - 2 * MARGINX
   boxHeight  = atlas.HEIGHT - 2 * MARGINY
   textWidth  = boxWidth - 2 * BOX_MARGIN
   textHeight = font:getHeight() + font:getLineHeight()
-
-  lm.setCursor(cursor)
-  lg.setFont(font)
 end
 
 return ui

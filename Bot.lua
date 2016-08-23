@@ -5,7 +5,6 @@ local la    = love.audio
 
 local Bot = orbis.Object:new{
   class    = 'Bot',
-  field    = 0,
   dir      = 0,
   speed    = 4.0,
   path     = nil,
@@ -79,7 +78,7 @@ end
 function Bot:draw(batch)
   local frame
   if self.path or not self.task then
-    frame = self.dir * 3 + ((self.anim < 0.167 and 1) or (self.anim < 0.500 and 2) or (self.anim < 0.833 and 3) or 1)
+    frame = ((self.anim < 0.167 and 1) or (self.anim < 0.500 and 5) or (self.anim < 0.833 and 9) or 1) + self.dir
   else
     frame = 13 + math.floor(self.anim * 4)
   end
@@ -93,6 +92,7 @@ function Bot:update(dt)
     self.anim = self.anim + self.speed * dt
 
     if self.anim >= 1.0 then
+      self.fx.step:stop()
       self.fx.step:play()
 
       orbis.objects[self.field] = nil
@@ -107,6 +107,7 @@ function Bot:update(dt)
         self.dir  = 0
         self.anim = 0.0
         self.path = nil
+        self.fx.step:stop()
       else
         self.dir = moveDir(self)
       end
@@ -117,7 +118,7 @@ function Bot:update(dt)
     if device and device:active() then
       self.task = true
       self.anim = self.anim + 2.0 * dt
-      self.anim = self.anim > 1.0 and self.anim - 1.0 or self.anim
+      self.anim = self.anim >= 1.0 and self.anim - 1.0 or self.anim
 
       if device.building then
         device.building = device.building + net.dt

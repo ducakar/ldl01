@@ -36,7 +36,7 @@ local Server = {
       price = 10000
     }
   },
-  location = { 0.0, 0.0 },
+  location = {0.0, 0.0},
   cpu      = nil,
   number   = 0,
   mips     = 0,

@@ -2,12 +2,12 @@ local atlas = require 'atlas'
 local net   = require 'net'
 local lg    = love.graphics
 
-local WIDTH          = 32
-local HEIGHT         = 18
+local WIDTH          = 20
+local HEIGHT         = 11
 
 local pathFields     = {}
-local internalColour = { 255, 255, 255 }
-local externalColour = { 160, 160, 160 }
+local internalColour = {255, 255, 255}
+local externalColour = {160, 160, 160}
 local internalsBatch = lg.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'static')
 local externalsBatch = lg.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'static')
 local objectsBatch   = lg.newSpriteBatch(atlas.image, WIDTH * HEIGHT, 'stream')
@@ -15,7 +15,7 @@ local buildCue       = nil
 
 local orbis = {
   Object    = {
-    field   = nil
+    field   = 0
   },
   width     = WIDTH,
   height    = HEIGHT,
@@ -37,7 +37,7 @@ end
 
 local function pathStep(path, depth, field)
   if pathFields[field] == 0 then
-    return { field }
+    return {field}
   elseif not pathFields[field] or pathFields[field] <= depth then
     return path
   else

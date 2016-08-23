@@ -45,7 +45,7 @@ function game.keyPressed(key)
     Decompressing Linux... Parsing ELF... done.
     Booting the kernel.
     starting version 337]],
-    { 'Yes', 'No' })
+    {'Yes', 'No'})
   end
 end
 
@@ -76,29 +76,29 @@ end
 function game.init()
   ui.init()
 
-  local o = stream.read('autosave.lua')
-  -- o = nil
+  -- local o = stream.read('autosave.lua')
+  local o = nil
 
   if o then
     net.init(o.net)
     orbis.init(o.orbis)
   else
     net.init()
-    orbis.init({ map = 'maps/warehouse' })
+    orbis.init{map = 'maps/arctic'}
 
-    orbis.actor = orbis.Object.Bot:new{ field = orbis.field(4, 4) }
+    orbis.actor = orbis.Object.Bot:new{field = orbis.field(4, 4)}
     orbis.actor:place()
 
-    orbis.Object.Warning:new{ field = orbis.field(24, 13) }:place()
-    orbis.Object.Server:new{ field = orbis.field(12, 6) }:place()
-    orbis.Object.Switch:new{ field = orbis.field(20, 10) }:place()
+    orbis.Object.Warning:new{field = orbis.field(24, 13)}:place()
+    orbis.Object.Server:new{field = orbis.field(12, 6)}:place()
+    orbis.Object.Switch:new{field = orbis.field(20, 10)}:place()
   end
 
   tracks = lf.getDirectoryItems('music')
 
   net.servers = {
-    Server:new{ location = { 20, 0 } },
-    Server:new{ location = { -160, 30 } }
+    Server:new{location = {20, 0}},
+    Server:new{location = {-160, 30}}
   }
 end
 

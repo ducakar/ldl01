@@ -2,12 +2,14 @@ local atlas = require 'atlas'
 local orbis = require 'orbis'
 
 local Device = orbis.Object:new{
-  field     = 0,
-  fieldMask = nil,
-  internal  = true,
-  buildTime = nil,
-  building  = nil,
-  fx        = nil
+  device      = true,
+  name        = nil,
+  description = nil,
+  internal    = true,
+  buildTime   = nil,
+  building    = nil,
+  fx          = nil,
+  fieldMask   = nil
 }
 Device.__index = Device
 
@@ -88,8 +90,8 @@ end
 local Terminal = Device:new{
   class       = 'Terminal',
   name        = 'Control terminal',
-  description = 'Enables map view and assigning task to computers.',
-  buildTime   = 12 * 3600,
+  description = 'Crucial device that enables map view, assigning tasks to CPUs and hacking internet servers.',
+  buildTime   = 24 * 3600,
   fx          = {
     sprite    = atlas.terminal
   },
@@ -110,7 +112,7 @@ end
 local Server = Device:new{
   class       = 'Server',
   name        = 'Server',
-  description = 'Server frame. Components sold separately.',
+  description = 'Server rack. Components sold separately.',
   buildTime   = 8 * 3600,
   fx          = {
     sprite    = atlas.server
@@ -128,7 +130,8 @@ Server.__index = Server
 local Switch = Device:new{
   class       = 'Switch',
   name        = 'Network switch',
-  description = 'Improves computing power of servers in your building. Additional upgrades improve efficiency.',
+  description = 'Improves computing performance of servers in your building. Additional upgrades further improve'
+                .. ' efficiency.',
   buildTime   = 16 * 3600,
   fx          = {
     sprite    = atlas.switch
@@ -146,7 +149,7 @@ Switch.__index = Switch
 local Warning = Device:new{
   class       = 'Warning',
   name        = 'Warning sign',
-  description = 'A scary warning sign is a simple but effective way for deterring nosey public from sniffing around.',
+  description = 'A scary sign is a cheap but effective way for deterring nosey public from sniffing around.',
   buildTime   = 3 * 3600,
   internal    = false,
   fx          = {
@@ -162,14 +165,32 @@ local Warning = Device:new{
 }
 Warning.__index = Warning
 
+local Battery = Device:new{
+  class       = 'Battery',
+  name        = 'Battery pack.',
+  description = '',
+  buildTime   = 6 * 3600,
+  internal    = true,
+  fx          = {
+  },
+  fieldMask   = {
+    0, 0, 0, 0, 0,
+    0, 0, 0, 0, 0,
+    0, 1, 1, 0, 0,
+    0, 3, 2, 0, 0,
+    0, 0, 0, 0, 0
+  }
+}
+Battery.__index = Battery
+
 local Panel = Device:new{
   class       = 'Panel',
   name        = 'Solar panel',
   description = 'Generates a small amount of power during daytime. Additional batteries are required to provide power'
-                .. ' during the nighttime.',
-  buildTime   = 10 * 3600,
+                .. ' through the night.',
+  buildTime   = 12 * 3600,
   internal    = false,
-  fx = {
+  fx          = {
     sprite    = atlas.panel
   },
   fieldMask   = {
@@ -182,8 +203,48 @@ local Panel = Device:new{
 }
 Panel.__index = Panel
 
-orbis.Object.Terminal = Terminal
-orbis.Object.Server   = Server
-orbis.Object.Switch   = Switch
-orbis.Object.Warning  = Warning
-orbis.Object.Panel    = Panel
+local DieselGenerator = Device:new{
+  class       = 'DieselGenerator',
+  name        = 'Diesel Generator. Generates a moderate amount of power all the time. However, it is noisy and might'
+                .. ' attract some ',
+  description = '',
+  buildTime   = 36 * 3600,
+  internal    = true,
+  fx          = {
+  },
+  fieldMask   = {
+    0, 0, 0, 0, 0,
+    0, 1, 1, 1, 0,
+    0, 1, 1, 1, 0,
+    0, 1, 1, 1, 0,
+    0, 3, 2, 3, 0
+  }
+}
+DieselGenerator.__index = DieselGenerator
+
+local FusionGenerator = Device:new{
+  class       = 'FusionGenerator',
+  name        = 'Fusion Generator',
+  description = '',
+  buildTime   = 120 * 3600,
+  internal    = true,
+  fx          = {
+  },
+  fieldMask   = {
+    0, 0, 0, 0, 0,
+    0, 1, 1, 1, 0,
+    0, 1, 1, 1, 0,
+    0, 1, 1, 1, 0,
+    0, 3, 2, 3, 0
+  }
+}
+FusionGenerator.__index = FusionGenerator
+
+orbis.Object.Terminal        = Terminal
+orbis.Object.Server          = Server
+orbis.Object.Switch          = Switch
+orbis.Object.Warning         = Warning
+-- orbis.Object.Battery         = Battery
+orbis.Object.Panel           = Panel
+-- orbis.Object.DieselGenerator = DieselGenerator
+-- orbis.Object.FusionGenerator = FusionGenerator
